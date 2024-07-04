@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:33:24
+ * Last modified  : 2024-07-04 16:38:35
  */
 
 import inquirer from 'inquirer';
@@ -226,7 +226,7 @@ class Publisher {
     const { name, version } = readePackageJson();
     const { mirrorType, npmTag } = this.config;
 
-    Logger.log('开始推送WebRTC SDK Npm包...');
+    Logger.log(`开始推送${this.projectName} Npm包...`);
 
     try {
       // 切换镜像
