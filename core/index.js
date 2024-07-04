@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 18:30:49
+ * Last modified  : 2024-07-04 18:32:18
  */
 
 import inquirer from 'inquirer';
@@ -60,6 +60,7 @@ class Publisher {
       quicklyConfig = module.default;
       console.log('quicklyConfig: ', quicklyConfig);
     } catch (error) {
+      console.log('=====errroo, ', error);
       quicklyConfig = {};
     }
 
