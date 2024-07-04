@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 17:06:54
+ * Last modified  : 2024-07-04 18:10:50
  */
 
 import inquirer from 'inquirer';
@@ -206,15 +206,19 @@ class Publisher {
    * 构建资源
    */
   async buildPackage() {
+    let script = '';
+
     try {
       Logger.log('开始构建SDK包...');
 
       const buildCommend = `${this.packager} ${this.buildScript}`;
+      script = buildCommend;
       await execShell(buildCommend, true);
 
       Logger.green('构建SDK包成功');
     } catch (error) {
-      Logger.error('build package error', error);
+      Logger.error('build package error', { error, script });
+      return Promise.reject('build package error');
     }
   }
 
