@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:49:15
+ * Last modified  : 2024-07-04 16:51:39
  */
 
 import inquirer from 'inquirer';
@@ -118,6 +118,8 @@ class Publisher {
 
       if (!this.isQuickBuild) {
         await this.createBuildConfig();
+      } else {
+        Logger.log('开始快速Beta版本构建...');
       }
 
       await this.createVersion();
@@ -160,6 +162,7 @@ class Publisher {
    * 创建Npm Version
    */
   async createVersion() {
+    Logger.log('开始更新Npm Version...');
     const { npmTag, changeVersionType, version, updateVersionType } = this.config;
 
     try {
