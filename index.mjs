@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 import { program } from 'commander';
-import { publisher } from './core/index.js';
+import { publisher } from './core/index.mjs';
 
 program.name('Npm Publisher Tool').version('0.0.1', '-v, --version', '[npm publisher version]');
 

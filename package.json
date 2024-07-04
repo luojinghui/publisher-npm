@@ -2,15 +2,14 @@
   "name": "publisher-npm",
   "version": "0.0.24",
   "description": "JavaScript library version management, build automation, and publishing tool for npm packages",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
     "build": "echo \"build  successfully\"",
     "publish:beta": "node index.js run --config ./build.config.js --beta",
     "publish:release": "node index.js run --config ./build.config.js"
   },
-  "type": "module",
   "bin": {
-    "publisher-npm": "index.js"
+    "publisher-npm": "index.mjs"
   },
   "keywords": [
     "XYLink",
