@@ -7,7 +7,7 @@ JavaScript library npm version management, build automation, and publishing tool
 1. 支持手动版本管理和基于 Npm Version 标准的版本规则
 2. 支持快速构建 Beta 版本
 3. 支持自动标记 Tag 版本并推送 Tag 版本
-4. 支持配置文件（build.config.js），配置多个镜像地址，支持切换自动切换镜像地址发布版本
+4. 支持配置文件（build.config.js），配置多个镜像地址，支持自动切换镜像地址发布版本
 5. 支持版本更新后，自动构建 Javascript 包资源，并自动推送指定镜像仓库
 6. 支持任意包管理器：pnpm、yarn、npm 等等
 
@@ -19,7 +19,7 @@ pnpm add publisher-npm -D
 
 ## 快速开始
 
-```json
+```base
 publisher-npm run [--config /path/build.config.js] [--beta]
 ```
 
