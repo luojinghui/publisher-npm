@@ -91,7 +91,7 @@ export function execShell(command, outputLog = false) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (outputLog) {
-        console.log('stdout: ', stdout);
+        console.log('output: ', stdout);
       }
 
       if (error) {

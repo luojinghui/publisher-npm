@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 17:02:16
+ * Last modified  : 2024-07-04 17:05:46
  */
 
 import inquirer from 'inquirer';
@@ -172,10 +172,10 @@ class Publisher {
         console.log('gitCommend: ', gitCommend);
 
         try {
-          await execShell(gitCommend);
-        } catch (error) {
-          Logger.log('git version push warn', error);
-        }
+          await execShell(gitCommend, true);
+        } catch (error) {}
+
+        Logger.green('手动版本变动Git提交成功');
 
         try {
           await execShell(gitTag(version));
