@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:54:24
+ * Last modified  : 2024-07-04 16:59:02
  */
 
 import inquirer from 'inquirer';
@@ -168,6 +168,8 @@ class Publisher {
 
         const branch = await getCurrentBranch();
         const gitCommend = `${gitAdd} && ${gitCommit(version)} && ${gitPush(branch.trim())}`;
+        
+        console.log('gitCommend: ', gitCommend);
 
         try {
           await execShell(gitCommend);
