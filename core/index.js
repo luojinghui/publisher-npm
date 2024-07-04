@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 18:10:50
+ * Last modified  : 2024-07-04 18:14:37
  */
 
 import inquirer from 'inquirer';
@@ -217,7 +217,8 @@ class Publisher {
 
       Logger.green('构建SDK包成功');
     } catch (error) {
-      Logger.error('build package error', { error, script });
+      Logger.error('build script:', script);
+      Logger.error('build package error', error);
       return Promise.reject('build package error');
     }
   }
