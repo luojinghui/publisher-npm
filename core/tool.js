@@ -19,6 +19,7 @@ export const gitCurrentBranch = 'git rev-parse --abbrev-ref HEAD';
  * @returns { string } - 设置镜像配置字符串
  */
 export const getRegistry = (packager, mirrorMap, mirrorType) => {
+  console.log('packager, mirrorMap, mirrorType: ', { packager, mirrorMap, mirrorType });
   const mirror = mirrorMap[mirrorType];
 
   if (!mirror) {
