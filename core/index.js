@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:38:35
+ * Last modified  : 2024-07-04 16:45:31
  */
 
 import inquirer from 'inquirer';
@@ -112,7 +112,7 @@ class Publisher {
       Logger.green('当前SDK版本：', readePackageJson().version);
       Logger.log('正在检测文件变动...');
 
-      await checkUncommittedChanges();
+      // await checkUncommittedChanges();
 
       Logger.green('检测完成，开始准备发布版本');
 

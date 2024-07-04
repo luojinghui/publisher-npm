@@ -134,14 +134,15 @@ export function validateVersion(version) {
  */
 export const getQuickConfigMap = (mirrorMap, npmTag) => {
   const keys = Object.keys(mirrorMap);
-  const firstMirror = mirrorMap[keys[0]];
+  const firstMirrorType = keys[0];
+
   const configMap = {
     [TagMap.beta]: {
       npmTag: TagMap.beta,
       changeVersionType: ChangeVType.auto,
       version: '',
       updateVersionType: 'prerelease',
-      mirrorType: firstMirror,
+      mirrorType: firstMirrorType,
     },
   };
 
