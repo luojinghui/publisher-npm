@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:45:31
+ * Last modified  : 2024-07-04 16:47:35
  */
 
 import inquirer from 'inquirer';
@@ -210,7 +210,7 @@ class Publisher {
     try {
       Logger.log('开始构建SDK包...');
 
-      const buildCommend = this.buildScript;
+      const buildCommend = `${this.packager} ${this.buildScript}`;
       await execShell(buildCommend, true);
 
       Logger.green('构建SDK包成功');
