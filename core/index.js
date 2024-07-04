@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:51:39
+ * Last modified  : 2024-07-04 16:54:06
  */
 
 import inquirer from 'inquirer';
@@ -103,10 +103,6 @@ class Publisher {
       if (beta) {
         const config = getQuickConfigMap(this.mirrorMap, TagMap.beta);
         this.setQuickConfig(config);
-      } else if (params && !config) {
-        // 参数失败
-        Logger.error('参数错误，请检查参数是否是：--beta', params);
-        return;
       }
 
       Logger.green('当前SDK版本：', readePackageJson().version);
