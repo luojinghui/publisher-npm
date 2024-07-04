@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 18:27:58
+ * Last modified  : 2024-07-04 18:30:49
  */
 
 import inquirer from 'inquirer';
@@ -52,6 +52,8 @@ class Publisher {
     let quicklyConfig = {};
     const { config } = options;
     const configPath = path.resolve(process.cwd(), config);
+
+    console.log('---------configPath: ', configPath);
 
     try {
       const module = await import(configPath);
