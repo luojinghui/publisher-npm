@@ -1,0 +1,29 @@
+{
+  "name": "npm-publisher",
+  "version": "1.0.1-beta.0",
+  "description": "JavaScript library version management, build automation, and publishing tool for npm packages",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo \"build  successfully\"",
+    "test": "node index.js run --config ./build.config.js --beta"
+  },
+  "type": "module",
+  "bin": {
+    "npm-publisher": "index.js"
+  },
+  "keywords": [
+    "XYLink",
+    "npm version",
+    "publish",
+    "build",
+    "pnpm",
+    "npm publish"
+  ],
+  "author": "Jinghui Luo",
+  "license": "MIT",
+  "devDependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "inquirer": "^9.3.3"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules
+.DS_Store
+/build
+*.log
+*.yml
+*-lock.json
+packages/test
+dist
+temp
+.version*
+.changelog
