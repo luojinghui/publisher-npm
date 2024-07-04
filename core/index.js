@@ -1,8 +1,10 @@
 /**
  * XYLink WebRTC SDK Build Tools
  *
+ * @authors Luo-jinghui (luojinghui424@gmail.com)
+ *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 16:22:43
+ * Last modified  : 2024-07-04 16:33:24
  */
 
 import inquirer from 'inquirer';

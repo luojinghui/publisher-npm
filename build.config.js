@@ -1,8 +1,8 @@
 export default {
-  buildScript: 'pnpm build:sdk',
+  buildScript: 'build',
   packager: 'pnpm',
   mirrorMap: {
-    XYLink: 'https://fe-private-npm.xylink.com/'
+    XYLink: 'https://fe-private-npm.xylink.com/',
   },
-  projectName: 'XYLink WebRTC SDK'
+  projectName: 'NPM Publisher',
 };

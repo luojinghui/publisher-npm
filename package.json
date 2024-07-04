@@ -1,6 +1,6 @@
 {
   "name": "npm-publisher",
-  "version": "1.0.1-beta.0",
+  "version": "0.0.1-beta.0",
   "description": "JavaScript library version management, build automation, and publishing tool for npm packages",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,11 @@
     "npm publish"
   ],
   "author": "Jinghui Luo",
+  "email": "luojinghui424@gmail.com",
+  "bugs": {
+    "url": "https://github.com/luojinghui/npm-publisher/issues",
+    "email": "luojinghui424@gmail.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "chalk": "^5.3.0",
