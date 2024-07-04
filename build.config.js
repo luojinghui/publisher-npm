@@ -4,5 +4,5 @@ export default {
   mirrorMap: {
     XYLink: 'https://fe-private-npm.xylink.com/',
   },
-  projectName: 'NPM Publisher',
+  projectName: 'Publisher NPM',
 };
