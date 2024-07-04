@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 18:37:08
+ * Last modified  : 2024-07-04 18:38:10
  */
 
 import inquirer from 'inquirer';
@@ -30,7 +30,7 @@ import {
   getRegistry,
   getPublishCommend,
   Logger,
-} from './tool.js';
+} from './tool.mjs';
 import path from 'path';
 
 class Publisher {
