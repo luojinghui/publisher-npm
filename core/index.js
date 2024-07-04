@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 17:01:02
+ * Last modified  : 2024-07-04 17:02:16
  */
 
 import inquirer from 'inquirer';
@@ -148,7 +148,7 @@ class Publisher {
       const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(this.mirrorMap));
       this.config.mirrorType = mirrorType;
 
-      Logger.log('发布版本配置信息', this.config);
+      Logger.log('发布版本配置信息', JSON.stringify(this.config));
     } catch (error) {
       Logger.error('版本发布失败，请检查', error);
     }
