@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 17:44:31
+ * Last modified  : 2024-07-05 17:52:41
  */
 
 import inquirer from 'inquirer';
@@ -132,6 +132,7 @@ class Publisher {
       await this.publishPackage();
     } catch (error) {
       Logger.error('publish error', error);
+      return Promise.reject(error);
     }
   }
 
@@ -257,7 +258,7 @@ class Publisher {
       Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
-      const data1 = await execShell(npmRegistry, true);
+      const data1 = await execShell(npmRegistry.trim(), true);
 
       console.log('=========set data1: ', data1);
 
@@ -275,11 +276,16 @@ class Publisher {
 
       Logger.log('publish package: ', publishCommend);
 
-      try {
-        await execShell(publishCommend, true);
-      } catch (error) {
-        Logger.warn('publish warn', error);
-      }
+      setTimeout(async () => {
+        const a = await execShell('npm config get registry', true);
+        console.log('==========get a: ', a);
+
+        try {
+          await execShell(publishCommend, true);
+        } catch (error) {
+          Logger.warn('publish warn', error);
+        }
+      }, 2000);
 
       Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
     } catch (error) {
