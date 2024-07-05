@@ -93,6 +93,7 @@ export function execShell(command, outputLog = false) {
     exec(command, (error, stdout, stderr) => {
       if (outputLog) {
         console.log('output: ', stdout);
+        console.log('stderr: ', stderr);
       }
 
       if (error) {
