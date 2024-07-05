@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 17:52:41
+ * Last modified  : 2024-07-05 19:39:31
  */
 
 import inquirer from 'inquirer';
@@ -247,7 +247,7 @@ class Publisher {
     try {
       // 切换镜像
       // const registry = getRegistry(this.packager, this.mirrorMap, mirrorType);
-      const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
+      // const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
       const mirror = this.mirrorMap[mirrorType];
 
       // if (!registry) {
@@ -255,37 +255,32 @@ class Publisher {
       //   return;
       // }
 
-      Logger.log('switch registry: ', npmRegistry);
+      // Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
-      const data1 = await execShell(npmRegistry.trim(), true);
+      // const data1 = await execShell(npmRegistry.trim(), true);
 
-      console.log('=========set data1: ', data1);
+      // console.log('=========set data1: ', data1);
 
-      Logger.green('切换Npm镜像成功: ', mirror);
+      // Logger.green('切换Npm镜像成功: ', mirror);
 
       Logger.log('正在推送SDK包...');
 
       // await execShell(`${this.packager} config list`, true);
       // await execShell(`npm config list`, true);
-      const data = await execShell('npm config get registry', true);
+      // const data = await execShell('npm config get registry', true);
 
-      console.log('==========get data: ', data);
+      // console.log('==========get data: ', data);
 
-      const publishCommend = getPublishCommend('npm', npmTag);
+      const publishCommend = getPublishCommend('npm', npmTag, mirror);
 
       Logger.log('publish package: ', publishCommend);
 
-      setTimeout(async () => {
-        const a = await execShell('npm config get registry', true);
-        console.log('==========get a: ', a);
-
-        try {
-          await execShell(publishCommend, true);
-        } catch (error) {
-          Logger.warn('publish warn', error);
-        }
-      }, 2000);
+      try {
+        await execShell(publishCommend, true);
+      } catch (error) {
+        Logger.warn('publish warn', error);
+      }
 
       Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
     } catch (error) {

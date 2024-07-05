@@ -36,10 +36,10 @@ export const getRegistry = (packager, mirrorMap, mirrorType) => {
  * @param { string } npmTag - 发布版本的tag
  * @returns { string } - 推送版本的命令配置
  */
-export const getPublishCommend = (packager, npmTag) => {
+export const getPublishCommend = (packager, npmTag, mirror) => {
   const tag = TagMap[npmTag];
 
-  return `${packager} publish --tag ${tag} --access public`;
+  return `${packager} publish --tag ${tag} --access public --registry ${mirror}`;
 };
 
 /**
