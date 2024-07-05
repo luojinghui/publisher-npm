@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 17:34:07
+ * Last modified  : 2024-07-05 17:35:21
  */
 
 import inquirer from 'inquirer';
@@ -254,7 +254,7 @@ class Publisher {
       //   return;
       // }
 
-      Logger.log('switch registry: ', registry);
+      Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
       await execShell(npmRegistry);
