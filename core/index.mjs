@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 13:16:44
+ * Last modified  : 2024-07-05 13:18:47
  */
 
 import inquirer from 'inquirer';
@@ -252,6 +252,8 @@ class Publisher {
         Logger.error('镜像地址错误，停止推送', mirror);
         return;
       }
+
+      console.log('switch registry: ', registry);
 
       await execShell(registry);
       Logger.green('切换Npm镜像成功: ', mirror);
