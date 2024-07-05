@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 17:41:53
+ * Last modified  : 2024-07-05 17:44:31
  */
 
 import inquirer from 'inquirer';
@@ -257,7 +257,7 @@ class Publisher {
       Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
-      const data1 = await execShell(npmRegistry);
+      const data1 = await execShell(npmRegistry, true);
 
       console.log('=========set data1: ', data1);
 
