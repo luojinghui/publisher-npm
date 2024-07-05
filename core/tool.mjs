@@ -312,6 +312,11 @@ export class Logger {
     const emoji = '❌';
     console.log(chalk.red(emoji, key, value, rest));
   }
+
+  static warn(key, value, ...rest) {
+    const emoji = '☹️';
+    console.log(chalk.cyan(emoji, key, value, rest));
+  }
 }
 
 /**
