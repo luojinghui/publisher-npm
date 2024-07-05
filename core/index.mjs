@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 16:38:38
+ * Last modified  : 2024-07-05 16:39:26
  */
 
 import inquirer from 'inquirer';
@@ -259,7 +259,7 @@ class Publisher {
 
       // await execShell(registry);
       // await execShell(npmRegistry);
-      execSync(`npmRegistry && npm config get registry`, { stdio: 'inherit' });
+      execSync(`${npmRegistry} && npm config get registry`, { stdio: 'inherit' });
       
       Logger.green('切换Npm镜像成功: ', mirror);
 
