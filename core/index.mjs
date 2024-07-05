@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 13:18:47
+ * Last modified  : 2024-07-05 14:17:39
  */
 
 import inquirer from 'inquirer';
@@ -253,7 +253,7 @@ class Publisher {
         return;
       }
 
-      console.log('switch registry: ', registry);
+      Logger.log('switch registry: ', registry);
 
       await execShell(registry);
       Logger.green('切换Npm镜像成功: ', mirror);
@@ -264,6 +264,8 @@ class Publisher {
         await execShell(`${this.packager} config list`, true);
 
         const publishCommend = getPublishCommend(this.packager, npmTag);
+
+        Logger.log('publish package: ', publishCommend);
 
         try {
           await execShell(publishCommend, true);
