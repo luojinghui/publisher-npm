@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 16:39:26
+ * Last modified  : 2024-07-05 16:43:50
  */
 
 import inquirer from 'inquirer';
@@ -33,7 +33,7 @@ import {
   readeConfigJson,
 } from './tool.mjs';
 import path from 'path';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 
 class Publisher {
   constructor() {
@@ -266,7 +266,7 @@ class Publisher {
       Logger.log('正在推送SDK包...');
 
       setTimeout(async () => {
-        const address = await execShell('npm config get registry');
+        const address = await spawnSync('npm config get registry');
 
         console.log('=======address: ', address);
 
