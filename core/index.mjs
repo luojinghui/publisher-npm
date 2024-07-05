@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 12:01:19
+ * Last modified  : 2024-07-05 12:03:41
  */
 
 import inquirer from 'inquirer';
@@ -195,7 +195,7 @@ class Publisher {
       } else {
         // Npm Version更新版本
         const tag = TagMap[npmTag];
-        const npmVersion = `npm version ${updateVersionType} --preid=${tag} -m "${commitMessage} %s ${this.commitMessageAfter}"`;
+        const npmVersion = `npm version ${updateVersionType} --preid=${tag} -m "${this.commitMessage} %s ${this.commitMessageAfter}"`;
 
         await execShell(npmVersion);
 
