@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 16:23:00
+ * Last modified  : 2024-07-05 16:32:42
  */
 
 import inquirer from 'inquirer';
@@ -33,6 +33,7 @@ import {
   readeConfigJson,
 } from './tool.mjs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 class Publisher {
   constructor() {
@@ -257,7 +258,9 @@ class Publisher {
       Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
-      await execShell(npmRegistry);
+      // await execShell(npmRegistry);
+      execSync(npmRegistry, { stdio: 'inherit' });
+      
       Logger.green('切换Npm镜像成功: ', mirror);
 
       Logger.log('正在推送SDK包...');
