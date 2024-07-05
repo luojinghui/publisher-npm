@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 15:44:14
+ * Last modified  : 2024-07-05 16:22:04
  */
 
 import inquirer from 'inquirer';
@@ -249,10 +249,10 @@ class Publisher {
       const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
       const mirror = this.mirrorMap[mirrorType];
 
-      if (!registry) {
-        Logger.error('镜像地址错误，停止推送', mirror);
-        return;
-      }
+      // if (!registry) {
+      //   Logger.error('镜像地址错误，停止推送', mirror);
+      //   return;
+      // }
 
       Logger.log('switch registry: ', npmRegistry);
 
