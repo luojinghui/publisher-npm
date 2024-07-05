@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 14:50:49
+ * Last modified  : 2024-07-05 15:41:32
  */
 
 import inquirer from 'inquirer';
@@ -245,7 +245,7 @@ class Publisher {
 
     try {
       // 切换镜像
-      const registry = getRegistry(this.packager, this.mirrorMap, mirrorType);
+      // const registry = getRegistry(this.packager, this.mirrorMap, mirrorType);
       const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
       const mirror = this.mirrorMap[mirrorType];
 
@@ -256,14 +256,20 @@ class Publisher {
 
       Logger.log('switch registry: ', registry);
 
-      await execShell(registry);
+      // await execShell(registry);
       await execShell(npmRegistry);
       Logger.green('切换Npm镜像成功: ', mirror);
 
       Logger.log('正在推送SDK包...');
 
       setTimeout(async () => {
-        await execShell(`${this.packager} config list`, true);
+        const address = await execShell('npm config get registry');
+
+        console.log('=======address: ', address);
+
+        return;
+
+        // await execShell(`${this.packager} config list`, true);
         await execShell(`npm config list`, true);
 
         const publishCommend = getPublishCommend('npm', npmTag);
@@ -277,7 +283,7 @@ class Publisher {
         }
 
         Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
-      }, 1000);
+      }, 2000);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
