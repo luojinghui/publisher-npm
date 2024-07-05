@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 12:55:19
+ * Last modified  : 2024-07-05 13:12:36
  */
 
 import inquirer from 'inquirer';
@@ -256,13 +256,17 @@ class Publisher {
       await execShell(registry);
       Logger.green('切换Npm镜像成功: ', mirror);
 
-      const publishCommend = getPublishCommend(this.packager, npmTag);
+      Logger.log('正在推送SDK包...');
 
-      try {
-        await execShell(publishCommend, true);
-      } catch (error) {}
+      setTimeout(async () => {
+        const publishCommend = getPublishCommend(this.packager, npmTag);
 
-      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
+        try {
+          await execShell(publishCommend, true);
+        } catch (error) {}
+
+        Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
+      }, 200);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
