@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 14:26:23
+ * Last modified  : 2024-07-05 14:48:01
  */
 
 import inquirer from 'inquirer';
@@ -246,6 +246,7 @@ class Publisher {
     try {
       // 切换镜像
       const registry = getRegistry(this.packager, this.mirrorMap, mirrorType);
+      const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
       const mirror = this.mirrorMap[mirrorType];
 
       if (!registry) {
@@ -256,12 +257,14 @@ class Publisher {
       Logger.log('switch registry: ', registry);
 
       await execShell(registry);
+      await execShell(npmRegistry);
       Logger.green('切换Npm镜像成功: ', mirror);
 
       Logger.log('正在推送SDK包...');
 
       setTimeout(async () => {
         await execShell(`${this.packager} config list`, true);
+        await execShell(`npm config list`, true);
 
         const publishCommend = getPublishCommend(this.packager, npmTag);
 
