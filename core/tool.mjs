@@ -98,14 +98,13 @@ export function execShell(command, outputLog = false) {
 
       if (error) {
         reject(`run commend error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        reject(`run commend err: ${stderr}`);
-        return;
       }
 
-      return resolve(stdout);
+      if (stderr) {
+        reject(`run commend err: ${stderr}`);
+      }
+
+      resolve(stdout);
     });
   });
 }
