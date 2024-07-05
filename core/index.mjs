@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 14:48:01
+ * Last modified  : 2024-07-05 14:50:49
  */
 
 import inquirer from 'inquirer';
@@ -266,7 +266,7 @@ class Publisher {
         await execShell(`${this.packager} config list`, true);
         await execShell(`npm config list`, true);
 
-        const publishCommend = getPublishCommend(this.packager, npmTag);
+        const publishCommend = getPublishCommend('npm', npmTag);
 
         Logger.log('publish package: ', publishCommend);
 
