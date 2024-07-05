@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 16:45:07
+ * Last modified  : 2024-07-05 17:34:07
  */
 
 import inquirer from 'inquirer';
@@ -33,7 +33,6 @@ import {
   readeConfigJson,
 } from './tool.mjs';
 import path from 'path';
-import { spawnSync } from 'child_process';
 
 class Publisher {
   constructor() {
@@ -255,38 +254,30 @@ class Publisher {
       //   return;
       // }
 
-      Logger.log('switch registry: ', npmRegistry);
+      Logger.log('switch registry: ', registry);
 
       // await execShell(registry);
-      // await execShell(npmRegistry);
-      spawnSync(`${npmRegistry} && npm config get registry`, { stdio: 'inherit' });
-      
+      await execShell(npmRegistry);
+
       Logger.green('切换Npm镜像成功: ', mirror);
 
       Logger.log('正在推送SDK包...');
 
-      setTimeout(async () => {
-        const address = await spawnSync('npm config get registry');
+      // await execShell(`${this.packager} config list`, true);
+      // await execShell(`npm config list`, true);
+      await execShell('npm config get registry', true);
 
-        console.log('=======address: ', address);
+      const publishCommend = getPublishCommend('npm', npmTag);
 
-        return;
+      Logger.log('publish package: ', publishCommend);
 
-        // await execShell(`${this.packager} config list`, true);
-        await execShell(`npm config list`, true);
+      try {
+        await execShell(publishCommend, true);
+      } catch (error) {
+        Logger.warn('publish warn', error);
+      }
 
-        const publishCommend = getPublishCommend('npm', npmTag);
-
-        Logger.log('publish package: ', publishCommend);
-
-        try {
-          await execShell(publishCommend, true);
-        } catch (error) {
-          Logger.warn('publish warn', error);
-        }
-
-        Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
-      }, 5000);
+      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
