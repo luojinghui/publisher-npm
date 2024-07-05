@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 12:03:41
+ * Last modified  : 2024-07-05 12:55:19
  */
 
 import inquirer from 'inquirer';
@@ -67,7 +67,7 @@ class Publisher {
       try {
         quicklyConfig = await readeConfigJson(parsePath);
       } catch (error) {
-        Logger.error(`配置文件:${parsePath} 不存在，请检查配置文件和路径`);
+        Logger.error(`配置文件:${parsePath} 不存在，请检查配置文件和路径，如需使用默认参数，请添加--configIgnore参数`);
         return Promise.reject('Config file not found');
       }
     }
