@@ -6,8 +6,9 @@ import chalk from 'chalk';
 export const gitTagPush = `git push --tags`;
 export const gitAdd = 'git add .';
 export const gitPush = (branch) => `git push --set-upstream origin ${branch}`;
-export const gitCommit = (version) => `git commit -m "feat: Publish Release Version: ${version} [#000000]"`;
-export const gitTag = (version) => `git tag -a v${version} -m "feat: Publish Release Version: ${version} [#000000]"`;
+export const gitCommit = (version, commit, commitAfter) => `git commit -m "${commit} ${version} ${commitAfter}"`;
+export const gitTag = (version, commit, commitAfter) =>
+  `git tag -a v${version} -m "${commit} ${version} ${commitAfter}"`;
 export const gitStatus = 'git status --porcelain';
 export const gitCurrentBranch = 'git rev-parse --abbrev-ref HEAD';
 
@@ -258,6 +259,18 @@ export const readePackageJson = () => {
   const packageJsonObj = JSON.parse(packageJson);
 
   return packageJsonObj;
+};
+
+/**
+ * 获取Config文件内容
+ *
+ * @param { string } path - Config文件路径
+ */
+export const readeConfigJson = (path) => {
+  const config = fs.readFileSync(path, 'utf8');
+  const parseConfig = JSON.parse(config);
+
+  return parseConfig;
 };
 
 /**

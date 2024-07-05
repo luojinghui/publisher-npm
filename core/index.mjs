@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-04 18:38:10
+ * Last modified  : 2024-07-05 12:01:19
  */
 
 import inquirer from 'inquirer';
@@ -30,6 +30,7 @@ import {
   getRegistry,
   getPublishCommend,
   Logger,
+  readeConfigJson,
 } from './tool.mjs';
 import path from 'path';
 
@@ -43,35 +44,40 @@ class Publisher {
       mirrorType: '',
     };
     this.isQuickBuild = false;
+    this.configName = 'build.config.json';
   }
 
   /**
    * 解析配置文件中的内容，同步给构建模块
    */
   async parseCommandConfig(options) {
+    const { config, configIgnore = false } = options;
     let quicklyConfig = {};
-    const { config } = options;
-    const configPath = path.resolve(process.cwd(), config);
+    let configPath = config;
 
-    console.log('---------configPath: ', configPath);
-
-    try {
-      const module = await import(configPath);
-      quicklyConfig = module.default;
-      console.log('quicklyConfig: ', quicklyConfig);
-    } catch (error) {
-      console.log('=====errroo, ', error);
+    if (configIgnore) {
       quicklyConfig = {};
+    } else if (!config) {
+      configPath = this.configName;
+    }
+
+    if (configPath) {
+      const parsePath = path.resolve(process.cwd(), configPath);
+
+      try {
+        quicklyConfig = await readeConfigJson(parsePath);
+      } catch (error) {
+        Logger.error(`配置文件:${parsePath} 不存在，请检查配置文件和路径`);
+        return Promise.reject('Config file not found');
+      }
     }
 
     /**
      * 构建资源Script命令：通过packager+buildScript组合运行，例如：'pnpm build'
-     * 格式：string
      */
     this.buildScript = quicklyConfig.buildScript || 'build';
     /**
      * 配置包管理器，支持 pnpm | yarn | npm 等主流管理器
-     * 格式：string
      */
     this.packager = quicklyConfig.packager || 'pnpm';
     /**
@@ -80,10 +86,11 @@ class Publisher {
      */
     this.mirrorMap = quicklyConfig.mirrorMap ? { ...quicklyConfig.mirrorMap, ...MirrorMap } : MirrorMap;
     /**
-     * 项目名称
-     * 格式：string
+     * 项目名称，构建资源包时提醒
      */
     this.projectName = quicklyConfig.projectName || 'Project';
+    this.commitMessage = quicklyConfig.commitMessage || 'feat: Publish Release Version:';
+    this.commitMessageAfter = quicklyConfig.commitMessageAfter || '[#000000]';
   }
 
   /**
@@ -98,15 +105,11 @@ class Publisher {
    * 交互获取推送信息
    */
   async run(options) {
-    const { config = '', beta = false } = options;
-
-    await this.parseCommandConfig(options);
-
-    console.log('====this: ', this);
-
     try {
+      await this.parseCommandConfig(options);
+
       // 快速构建
-      if (beta) {
+      if (options.beta) {
         const config = getQuickConfigMap(this.mirrorMap, TagMap.beta);
         this.setQuickConfig(config);
       }
@@ -157,6 +160,7 @@ class Publisher {
       Logger.log('发布版本配置信息', JSON.stringify(this.config));
     } catch (error) {
       Logger.error('版本发布失败，请检查', error);
+      return Promise.reject('Version publish failed');
     }
   }
 
@@ -173,7 +177,8 @@ class Publisher {
         updatePackageJsonVersion(version);
 
         const branch = await getCurrentBranch();
-        const gitCommend = `${gitAdd} && ${gitCommit(version)} && ${gitPush(branch.trim())}`;
+        const commit = gitCommit(version, this.commitMessage, this.commitMessageAfter);
+        const gitCommend = `${gitAdd} && ${commit} && ${gitPush(branch.trim())}`;
 
         try {
           await execShell(gitCommend, true);
@@ -182,7 +187,7 @@ class Publisher {
         Logger.green('手动版本变动Git提交成功');
 
         try {
-          await execShell(gitTag(version));
+          await execShell(gitTag(version, this.commitMessage, this.commitMessageAfter));
           await execShell(gitTagPush);
         } catch (error) {}
 
@@ -190,7 +195,7 @@ class Publisher {
       } else {
         // Npm Version更新版本
         const tag = TagMap[npmTag];
-        const npmVersion = `npm version ${updateVersionType} --preid=${tag} -m "feat: Publish Release Version: %s [#000000]"`;
+        const npmVersion = `npm version ${updateVersionType} --preid=${tag} -m "${commitMessage} %s ${this.commitMessageAfter}"`;
 
         await execShell(npmVersion);
 
@@ -202,9 +207,9 @@ class Publisher {
         Logger.green('Npm变更SDK Version提交成功: ', version);
       }
     } catch (error) {
-      Logger.error('create version error', error);
+      Logger.error('Npm 版本生成失败，请检查', error);
 
-      return Promise.reject('npm version error, 请检查');
+      return Promise.reject('npm version error');
     }
   }
 

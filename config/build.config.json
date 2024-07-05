@@ -1,0 +1,10 @@
+{
+  "buildScript": "build",
+  "packager": "pnpm",
+  "mirrorMap": {
+    "XYLink": "https://fe-private-npm.xylink.com/"
+  },
+  "projectName": "Publisher NPM",
+  "commitMessage": "feat: Publish Release Version:",
+  "commitMessageAfter": "[#000000]"
+}

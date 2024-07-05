@@ -8,6 +8,7 @@ program
   .command('run')
   .description('run npm publisher')
   .option('--config <path>', '[create build.config.js in project root directory]')
+  .option('--configIgnore', '[use default config file, not create build.config.json file in project]')
   .option('--beta', '[publish beta version quickly]')
   .action((options) => {
     publisher.run(options);

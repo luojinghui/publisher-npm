@@ -1,0 +1,9 @@
+src/
+node_modules
+yarn-error.log
+.DS_Store
+
+config/
+.vscode/
+.gitignore
+pnpm-lock.yaml

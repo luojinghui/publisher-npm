@@ -5,8 +5,8 @@
   "main": "index.mjs",
   "scripts": {
     "build": "echo \"build  successfully\"",
-    "publish:beta": "node index.mjs run --config ./build.config.mjs --beta",
-    "publish:release": "node index.mjs run --config ./build.config.mjs"
+    "publish:beta": "node index.mjs run --beta --config ./config/build.config.json",
+    "publish:release": "node index.mjs run --config ./config/build.config.json"
   },
   "bin": {
     "publisher-npm": "index.mjs"
