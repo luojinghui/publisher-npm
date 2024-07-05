@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 17:35:21
+ * Last modified  : 2024-07-05 17:41:53
  */
 
 import inquirer from 'inquirer';
@@ -257,7 +257,9 @@ class Publisher {
       Logger.log('switch registry: ', npmRegistry);
 
       // await execShell(registry);
-      await execShell(npmRegistry);
+      const data1 = await execShell(npmRegistry);
+
+      console.log('=========set data1: ', data1);
 
       Logger.green('切换Npm镜像成功: ', mirror);
 
@@ -265,7 +267,9 @@ class Publisher {
 
       // await execShell(`${this.packager} config list`, true);
       // await execShell(`npm config list`, true);
-      await execShell('npm config get registry', true);
+      const data = await execShell('npm config get registry', true);
+
+      console.log('==========get data: ', data);
 
       const publishCommend = getPublishCommend('npm', npmTag);
 
