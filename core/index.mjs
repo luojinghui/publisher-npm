@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 16:22:04
+ * Last modified  : 2024-07-05 16:23:00
  */
 
 import inquirer from 'inquirer';
@@ -283,7 +283,7 @@ class Publisher {
         }
 
         Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
-      }, 2000);
+      }, 5000);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
