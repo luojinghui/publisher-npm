@@ -208,22 +208,37 @@ export const QuestionInputVersion = [
  * 获取更新版本的方式问题配置
  */
 export const QuestionSwitchVersion = (npmTag) => {
-  return [
-    {
-      type: 'list',
-      name: 'updateVersionType',
-      message: `请选择版本更新规则，规则如下：
-        [MAJOR, MINOR, PATCH-${npmTag}.BUILD]
-        prerelease(常规更新): 1.0.0 -> 1.0.1-${npmTag}.0 -> 1.0.1-${npmTag}.1,
-        patch(小版本): v1.0.0-${npmTag}.0 -> v1.0.0
-        prepatch: 1.0.0-${npmTag}.0 -> 1.0.1-${npmTag}.0
-        minor(次版本): 1.0.0 -> 1.1.0
-        preminor: 1.0.0-${npmTag}.0 -> 1.1.0-${npmTag}.0
-        major(大版本): 1.0.0 -> 2.0.0
-        premajor: 1.0.0-${npmTag}.0 -> 2.0.0-${npmTag}.0`,
-      choices: ['prerelease', 'patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor'],
-    },
-  ];
+  const tag = TagMap[npmTag];
+  const versionMap = {
+    prerelease: `prerelease(常规更新): 1.0.0 -> 1.0.1-${npmTag}.0 -> 1.0.1-${npmTag}.1`,
+    patch: `patch(小版本): v1.0.0 -> v1.0.1`,
+    minor: `minor(次版本): 1.0.0 -> 1.1.0`,
+    major: `major(大版本): 1.0.0 -> 2.0.0`,
+    prepatch: `prepatch: 1.0.0-${npmTag}.0 -> 1.0.1-${npmTag}.0`,
+    preminor: `preminor: 1.0.0-${npmTag}.0 -> 1.1.0-${npmTag}.0`,
+    premajor: `premajor: 1.0.0-${npmTag}.0 -> 2.0.0-${npmTag}.0`,
+  };
+  const latestFilterMap = ['prerelease', 'prepatch', 'preminor', 'premajor'];
+  let choices = [];
+  let message = '';
+
+  if (tag === 'latest') {
+    message = `请选择版本更新规则，规则如下：\n[MAJOR, MINOR, PATCH]\n`;
+  } else {
+    message = `请选择版本更新规则，规则如下：\n[MAJOR, MINOR, PATCH-${npmTag}.BUILD]\n`;
+  }
+
+  for (let key in versionMap) {
+    if (tag === 'latest' && !latestFilterMap.includes(key)) {
+      message += `${versionMap[key]}\n`;
+      choices.push(key);
+    } else if (tag !== 'latest') {
+      message += `${versionMap[key]}\n`;
+      choices.push(key);
+    }
+  }
+
+  return [{ type: 'list', name: 'updateVersionType', message, choices }];
 };
 
 /**
@@ -238,14 +253,7 @@ export const getQuestionMirrorType = (mirrorMap) => {
     message += `\n${key}镜像: ${mirrorMap[key]}`;
   }
 
-  const QuestionMirrorType = [
-    {
-      type: 'list',
-      name: 'mirrorType',
-      message,
-      choices: choices,
-    },
-  ];
+  const QuestionMirrorType = [{ type: 'list', name: 'mirrorType', message, choices: choices }];
 
   return QuestionMirrorType;
 };
