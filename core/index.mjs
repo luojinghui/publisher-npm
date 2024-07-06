@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-06 14:46:37
+ * Last modified  : 2024-07-06 14:49:42
  */
 
 import inquirer from 'inquirer';
@@ -27,7 +27,6 @@ import {
   gitTagPush,
   MirrorMap,
   getQuickConfigMap,
-  getRegistry,
   getPublishCommend,
   Logger,
   readeConfigJson,
@@ -253,9 +252,7 @@ class Publisher {
 
       try {
         await execShell(publishCommend, true);
-      } catch (error) {
-        Logger.warn('publish warn', error);
-      }
+      } catch (error) {}
 
       Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
     } catch (error) {
