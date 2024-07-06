@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-05 19:39:31
+ * Last modified  : 2024-07-06 14:46:37
  */
 
 import inquirer from 'inquirer';
@@ -245,36 +245,11 @@ class Publisher {
     Logger.log(`开始推送${this.projectName} Npm包...`);
 
     try {
-      // 切换镜像
-      // const registry = getRegistry(this.packager, this.mirrorMap, mirrorType);
-      // const npmRegistry = getRegistry('npm', this.mirrorMap, mirrorType);
       const mirror = this.mirrorMap[mirrorType];
-
-      // if (!registry) {
-      //   Logger.error('镜像地址错误，停止推送', mirror);
-      //   return;
-      // }
-
-      // Logger.log('switch registry: ', npmRegistry);
-
-      // await execShell(registry);
-      // const data1 = await execShell(npmRegistry.trim(), true);
-
-      // console.log('=========set data1: ', data1);
-
-      // Logger.green('切换Npm镜像成功: ', mirror);
-
-      Logger.log('正在推送SDK包...');
-
-      // await execShell(`${this.packager} config list`, true);
-      // await execShell(`npm config list`, true);
-      // const data = await execShell('npm config get registry', true);
-
-      // console.log('==========get data: ', data);
-
-      const publishCommend = getPublishCommend('npm', npmTag, mirror);
+      const publishCommend = getPublishCommend(this.packager, npmTag, mirror);
 
       Logger.log('publish package: ', publishCommend);
+      Logger.log('正在推送SDK包...');
 
       try {
         await execShell(publishCommend, true);
