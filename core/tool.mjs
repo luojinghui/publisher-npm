@@ -39,7 +39,7 @@ export const getRegistry = (packager, mirrorMap, mirrorType) => {
 export const getPublishCommend = (packager, npmTag, mirror) => {
   const tag = TagMap[npmTag];
 
-  return `${packager} publish --tag ${tag} --access public --registry ${mirror}`;
+  return `${packager} publish --tag ${tag} --access public --registry ${mirror} --no-git-checks`;
 };
 
 /**
