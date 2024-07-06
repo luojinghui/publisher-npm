@@ -11,6 +11,19 @@ JavaScript library npm version management, build automation, and publishing tool
 5. 支持版本更新后，自动构建 Javascript 包资源，并自动推送指定镜像仓库
 6. 支持任意包管理器：pnpm、yarn、npm 等等
 
+
+快速构建Beta包：
+
+![build_1](https://github.com/luojinghui/publisher-npm/assets/12367406/ad008627-799f-4c47-9b78-817e87ce8e50)
+
+选择性构建：
+
+![relase_2](https://github.com/luojinghui/publisher-npm/assets/12367406/ca1f6744-ec02-4314-8ccb-64594d0b72da)
+
+手动指定版本：
+
+![release_mau_1](https://github.com/luojinghui/publisher-npm/assets/12367406/f5742353-a9b1-4ea2-8fa4-f13f63d8eb14)
+
 ## 安装
 
 ```bash
