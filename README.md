@@ -20,33 +20,36 @@ pnpm add publisher-npm -D
 ## 快速开始
 
 ```base
-publisher-npm run [--config /path/build.config.js] [--beta]
+publisher-npm run [--config /path/build.config.js] [--configIgnore] [--beta] [-v] [-h]
 ```
 
 参数说明:
 
-- --config 可选参数，配置后在后面跟随填写配置文件路径地址，会基于此配置更新配置内容，如果未指定，则会自动读取跟路径下的`build.config.js`文件
-- --beta 可选参数，配置是否快速构建 Beta 版本，默认是不构建
+- --config 可选参数，配置后在后面跟随填写配置文件路径地址，会基于此配置更新配置内容，如果未指定，则会自动读取跟路径下的`build.config.json`文件
+- --beta 可选参数，配置是否快速构建 Beta 版本，默认是不构建，构建时默认使用第一个镜像仓库地址推送 Npm 包
+- --configIgnore 可选参数，是否省略配置，如果项目中仅需支持 NPM 镜像仓库，则无需配置`build.config.json`文件，使用此参数即可
 
 ### 添加配置文件
 
-在项目跟目录添加配置文件：`build.config.js`
+在项目跟目录添加配置文件：`build.config.json`
 
 > 如果是其他目录，则需要使用--config 配置加载配置路径
 
-```js
-export default {
+```json
+{
   // 构建包命令，从 package.json 中的script中获取
-  buildScript: 'build:lib',
+  "buildScript": "build",
   // 项目使用的包管理器，支持pnpm、yarn、npm等
-  packager: 'pnpm',
+  "packager": "pnpm",
   // 指定多个镜像列表，默认内部会合并Npm镜像，在发布时，可以选择任意发布镜像地址
-  mirrorMap: {
-    Private: 'https://xxx.xxx.xxx/',
-    Private2: 'https://xxx.xxx.xxx/',
+  "mirrorMap": {
+    "Private": "https://xxx.xxx.xxx/",
+    "Private2": "https://xxx.xxx.xxx/",
   },
   // 项目名称，在输出日志中展示
-  projectName: 'XYLink WebRTC SDK',
+  "projectName": "XYLink WebRTC SDK",
+  "commitMessage": "feat: Publish Release Version:",
+  "commitMessageAfter": "[#000000]"
 };
 ```
 
