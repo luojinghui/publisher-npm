@@ -12,14 +12,12 @@
     "publisher-npm": "index.mjs"
   },
   "keywords": [
-    "XYLink",
     "npm version",
-    "publish",
-    "publisher",
+    "npm publish",
+    "publisher npm",
     "build",
-    "pnpm",
     "npm publisher",
-    "publisher npm"
+    "npm build"
   ],
   "author": "Jinghui Luo",
   "email": "luojinghui424@gmail.com",
