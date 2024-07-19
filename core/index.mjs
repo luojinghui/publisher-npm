@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-19 18:39:02
+ * Last modified  : 2024-07-19 18:43:42
  */
 
 import inquirer from 'inquirer';
@@ -162,11 +162,9 @@ class Publisher {
     Logger.log('unpublish script: ', script);
     try {
       await execShell(script, true);
+    } catch (error) {}
 
-      Logger.log('撤销版本成功：', module);
-    } catch (error) {
-      Logger.error('撤销版本失败: ', error);
-    }
+    Logger.log('撤销版本成功：', module);
   }
 
   /**
