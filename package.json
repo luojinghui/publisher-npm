@@ -6,7 +6,8 @@
   "scripts": {
     "build": "echo \"build  successfully\"",
     "publish:beta": "node index.mjs run --beta --configIgnore",
-    "publish:release": "node index.mjs run --config ./config/build.config.json"
+    "publish:release": "node index.mjs run --config ./config/build.config.json",
+    "reverse": "node index.mjs run --reverse"
   },
   "bin": {
     "publisher-npm": "index.mjs"

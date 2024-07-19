@@ -10,6 +10,7 @@ program
   .option('--config <path>', '[create build.config.js in project root directory]')
   .option('--configIgnore', '[use default config file, not create build.config.json file in project]')
   .option('--beta', '[publish beta version quickly]')
+  .option('--reverse', '[unpublish version]')
   .action(async (options) => {
     try {
       await publisher.run(options);

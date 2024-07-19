@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-07-06 16:06:21
+ * Last modified  : 2024-07-19 18:38:05
  */
 
 import inquirer from 'inquirer';
@@ -30,6 +30,8 @@ import {
   getPublishCommend,
   Logger,
   readeConfigJson,
+  InputReverseVersion,
+  createReverseScript,
 } from './tool.mjs';
 import path from 'path';
 
@@ -44,15 +46,18 @@ class Publisher {
     };
     this.isQuickBuild = false;
     this.configName = 'build.config.json';
+    this.reverse = false;
   }
 
   /**
    * 解析配置文件中的内容，同步给构建模块
    */
   async parseCommandConfig(options) {
-    const { config, configIgnore = false } = options;
+    const { config, configIgnore = false, reverse = false } = options;
     let quicklyConfig = {};
     let configPath = config;
+
+    this.reverse = reverse;
 
     if (configIgnore) {
       quicklyConfig = {};
@@ -118,20 +123,49 @@ class Publisher {
 
       await checkUncommittedChanges();
 
-      Logger.green('检测完成，开始准备发布版本');
-
-      if (!this.isQuickBuild) {
-        await this.createBuildConfig();
+      if (this.reverse) {
+        Logger.green('开始启动撤销版本流程');
+        await this.reverseVersion();
       } else {
-        Logger.log('开始快速Beta版本构建...');
-      }
+        Logger.green('检测完成，开始准备发布版本');
 
-      await this.createVersion();
-      await this.buildPackage();
-      await this.publishPackage();
+        if (!this.isQuickBuild) {
+          await this.createBuildConfig();
+        } else {
+          Logger.log('开始快速Beta版本构建...');
+        }
+
+        await this.createVersion();
+        await this.buildPackage();
+        await this.publishPackage();
+      }
     } catch (error) {
-      Logger.error('publish error', error);
-      return Promise.reject(error);
+      if (this.reverse) {
+        Logger.error('unpublish error', error);
+        return Promise.reject(error);
+      } else {
+        Logger.error('publish error', error);
+        return Promise.reject(error);
+      }
+    }
+  }
+
+  /**
+   * 撤销版本
+   */
+  async reverseVersion() {
+    const { reverse_version } = await inquirer.prompt(InputReverseVersion);
+    const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(this.mirrorMap));
+    const mirror = this.mirrorMap[mirrorType];
+    const { script, module } = await createReverseScript(this.packager, reverse_version, mirror);
+
+    Logger.log('unpublish script: ', script);
+    try {
+      await execShell(script, true);
+
+      Logger.log('撤销版本成功：', module);
+    } catch (error) {
+      Logger.error('撤销版本失败: ', error);
     }
   }
 

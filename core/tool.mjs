@@ -199,7 +199,25 @@ export const QuestionInputVersion = [
         return true;
       }
 
-      return '版本号不符合规则，请重新输入';
+      return '版本号不符合规则，请重新输入\n';
+    },
+  },
+];
+
+/**
+ * 输入版本方式配置
+ */
+export const InputReverseVersion = [
+  {
+    type: 'input',
+    name: 'reverse_version',
+    message: '请输入需要撤销的版本号\n',
+    validate: (version) => {
+      if (validateVersion(version)) {
+        return true;
+      }
+
+      return '版本号不符合规则，请重新输入\n';
     },
   },
 ];
@@ -256,6 +274,23 @@ export const getQuestionMirrorType = (mirrorMap) => {
   const QuestionMirrorType = [{ type: 'list', name: 'mirrorType', message, choices: choices }];
 
   return QuestionMirrorType;
+};
+
+/**
+ * 获取撤销版本命令
+ *
+ * @param { string } packager - 包管理器
+ * @param { string } version - 需要撤销的版本
+ * @param { string } mirror - 选择的镜像地址
+ * @return { string } - 返回撤销版本的命令
+ */
+export const createReverseScript = async (packager, version, mirror) => {
+  const pak = await readePackageJson();
+  const name = pak.name;
+  const module = `${name}@${version}`;
+  const script = `${packager} unpublish ${moduleName} --force --registry ${mirror}`;
+
+  return { script, module };
 };
 
 /**
