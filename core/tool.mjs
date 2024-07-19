@@ -288,7 +288,7 @@ export const createReverseScript = async (packager, version, mirror) => {
   const pak = await readePackageJson();
   const name = pak.name;
   const module = `${name}@${version}`;
-  const script = `${packager} unpublish ${moduleName} --force --registry ${mirror}`;
+  const script = `${packager} unpublish ${module} --force --registry ${mirror}`;
 
   return { script, module };
 };
