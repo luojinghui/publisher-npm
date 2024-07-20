@@ -338,27 +338,35 @@ export const getCurrentBranch = () => {
 };
 
 export class Logger {
-  static log(key, value, ...rest) {
-    console.log(chalk.dim(key, value, rest));
+  static log(key, value) {
+    this.printMessage(chalk.dim, key, value);
   }
 
-  static cyan(key, value, ...rest) {
-    console.log(chalk.cyanBright(key, value, rest));
+  static cyan(key, value) {
+    this.printMessage(chalk.cyanBright, key, value);
   }
 
-  static green(key, value, ...rest) {
+  static green(key, value) {
     const emoji = getEmoji();
-    console.log(chalk.green(emoji, key, value, rest));
+    this.printMessage(chalk.green, key, value, emoji);
   }
 
-  static error(key, value, ...rest) {
+  static error(key, value) {
     const emoji = '❌';
-    console.log(chalk.red(emoji, key, value, rest));
+    this.printMessage(chalk.red, key, value, emoji);
   }
 
-  static warn(key, value, ...rest) {
+  static warn(key, value) {
     const emoji = '☹️';
-    console.log(chalk.cyan(emoji, key, value, rest));
+    this.printMessage(chalk.cyan, key, value, emoji);
+  }
+
+  static printMessage(colorFunction, key, value, emoji = '') {
+    if (value) {
+      console.log(colorFunction(emoji, key, value));
+    } else {
+      console.log(colorFunction(emoji, key));
+    }
   }
 }
 
