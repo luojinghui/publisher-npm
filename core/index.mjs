@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 18:53:32
+ * Last modified  : 2024-08-12 18:57:05
  */
 
 import inquirer from 'inquirer';
@@ -163,8 +163,8 @@ class Publisher {
 
     this.buildConfig = { ...this.buildConfig, ...configFileContent };
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
-    const path = this.getPackageJsonPath();
-    this.currentVersion = readePackageJson(path).version;
+    const packageJsonpath = this.getPackageJsonPath();
+    this.currentVersion = readePackageJson(packageJsonpath).version;
 
     console.log('this.commandConfig: ', this.commandConfig);
     console.log('this.buildConfig: ', this.buildConfig);
@@ -293,8 +293,8 @@ class Publisher {
       if (!isNpmVersion) {
         const { commitMessage } = this.buildConfig;
         const replaceCommitMessage = commitMessage.replace('%s', release);
-        const path = this.getPackageJsonPath();
-        updatePackageJsonVersion(path, release);
+        const packageJsonPath = this.getPackageJsonPath();
+        updatePackageJsonVersion(packageJsonPath, release);
 
         const branch = await getCurrentBranch();
         const commit = gitCommit(replaceCommitMessage);
@@ -323,8 +323,8 @@ class Publisher {
         try {
           await execShell(gitTagPush);
         } catch (error) {}
-        const path = this.getPackageJsonPath();
-        const version = readePackageJson(path).version;
+        const readePackageJson = this.getPackageJsonPath();
+        const version = readePackageJson(readePackageJson).version;
         Logger.green('Npm变更SDK Version提交成功: ', version);
       }
     } catch (error) {
@@ -379,8 +379,8 @@ class Publisher {
       return;
     }
 
-    const path = this.getPackageJsonPath();
-    const { name, version } = readePackageJson(path);
+    const readePackageJson = this.getPackageJsonPath();
+    const { name, version } = readePackageJson(readePackageJson);
     const { npmTag, mirrorType } = this.userSelectConfig;
     const { projectName, mirrorMap, packager, basePath } = this.buildConfig;
 
