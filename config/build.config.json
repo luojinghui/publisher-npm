@@ -6,5 +6,5 @@
   },
   "projectName": "Publisher NPM",
   "commitMessage": "feat: publish release version v%s [#000000]",
-  "basePath": "./dist/tool"
+  "basePath": "."
 }
