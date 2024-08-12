@@ -268,9 +268,8 @@ export const createReverseScript = async (packager, version, mirror) => {
 /**
  * 获取PackageJson文件内容
  */
-export const readePackageJson = () => {
-  const packagePath = path.join(process.cwd(), 'package.json');
-  const packageJson = fs.readFileSync(packagePath, 'utf8');
+export const readePackageJson = (path) => {
+  const packageJson = fs.readFileSync(path, 'utf8');
   const packageJsonObj = JSON.parse(packageJson);
 
   return packageJsonObj;
@@ -291,13 +290,12 @@ export const readeConfigJson = (path) => {
 /**
  * 更新PackageJson的版本信息
  */
-export const updatePackageJsonVersion = (version) => {
-  const packagePath = path.join(process.cwd(), 'package.json');
-  const packageJson = fs.readFileSync(packagePath, 'utf8');
+export const updatePackageJsonVersion = (path, version) => {
+  const packageJson = fs.readFileSync(path, 'utf8');
   const packageJsonObj = JSON.parse(packageJson);
 
   packageJsonObj.version = version;
-  fs.writeFileSync(packagePath, JSON.stringify(packageJsonObj, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(path, JSON.stringify(packageJsonObj, null, 2) + '\n', 'utf8');
 
   return true;
 };

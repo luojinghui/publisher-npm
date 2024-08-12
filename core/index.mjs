@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 17:12:29
+ * Last modified  : 2024-08-12 18:53:32
  */
 
 import inquirer from 'inquirer';
@@ -34,7 +34,6 @@ import {
   TaskConfigMap,
 } from './tool.mjs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 class Publisher {
   constructor() {
@@ -73,8 +72,10 @@ class Publisher {
     this.buildConfig = {
       // 构建Script脚本命令
       buildScript: '',
-      // 包的基础路径，默认是项目根目录，如需推送其他目录资源，请指定
+      // 构建包的基础路径，默认是项目根目录，如需推送其他目录资源，请指定
       basePath: '.',
+      // 项目的package.json路径，默认是项目根目录下的位置
+      packageJsonPath: '.',
       // 包管理器，默认是pnpm
       packager: 'pnpm',
       // 镜像配置列表，key是镜像名，value是镜像地址，配置后将在命令行发布镜像选择中罗列出来
@@ -162,10 +163,23 @@ class Publisher {
 
     this.buildConfig = { ...this.buildConfig, ...configFileContent };
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
-    this.currentVersion = readePackageJson().version;
+    const path = this.getPackageJsonPath();
+    this.currentVersion = readePackageJson(path).version;
 
     console.log('this.commandConfig: ', this.commandConfig);
     console.log('this.buildConfig: ', this.buildConfig);
+  }
+
+  /**
+   * 获取项目packageJson文件的路径
+   *
+   * @returns { string } - package.json文件路径
+   */
+  getPackageJsonPath() {
+    const { packageJsonPath } = this.buildConfig;
+    const path = path.resolve(process.cwd(), packageJsonPath, 'package.json');
+
+    return path;
   }
 
   parseTask() {
@@ -279,8 +293,8 @@ class Publisher {
       if (!isNpmVersion) {
         const { commitMessage } = this.buildConfig;
         const replaceCommitMessage = commitMessage.replace('%s', release);
-
-        updatePackageJsonVersion(release);
+        const path = this.getPackageJsonPath();
+        updatePackageJsonVersion(path, release);
 
         const branch = await getCurrentBranch();
         const commit = gitCommit(replaceCommitMessage);
@@ -309,8 +323,8 @@ class Publisher {
         try {
           await execShell(gitTagPush);
         } catch (error) {}
-
-        const version = readePackageJson().version;
+        const path = this.getPackageJsonPath();
+        const version = readePackageJson(path).version;
         Logger.green('Npm变更SDK Version提交成功: ', version);
       }
     } catch (error) {
@@ -365,7 +379,8 @@ class Publisher {
       return;
     }
 
-    const { name, version } = readePackageJson();
+    const path = this.getPackageJsonPath();
+    const { name, version } = readePackageJson(path);
     const { npmTag, mirrorType } = this.userSelectConfig;
     const { projectName, mirrorMap, packager, basePath } = this.buildConfig;
 
