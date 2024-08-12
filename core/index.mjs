@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 16:02:55
+ * Last modified  : 2024-08-12 16:17:28
  */
 
 import inquirer from 'inquirer';
@@ -316,12 +316,25 @@ class Publisher {
    * 构建资源
    */
   async buildPackage() {
+    const { build } = this.commandConfig.taskConfig;
+
+    if (!build) {
+      Logger.log('忽略构建版本！');
+      return;
+    }
+
     let script = '';
 
     try {
       Logger.log('开始构建SDK包...');
+      const { packager, buildScript } = this.buildConfig;
 
-      const buildCommend = `${this.packager} ${this.buildScript}`;
+      if (!buildScript) {
+        Logger.log('构建命令 buildScript 配置为空，跳过构建包步骤');
+        return;
+      }
+
+      const buildCommend = `${packager} ${buildScript}`;
       script = buildCommend;
       await execShell(buildCommend, true);
 
