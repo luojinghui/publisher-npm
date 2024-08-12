@@ -7,7 +7,8 @@
     "build": "echo \"build  successfully\"",
     "publish:beta": "node index.mjs run --quickBeta --config ./config/build.config.json",
     "publish:release": "node index.mjs run --config ./config/build.config.json",
-    "reverse": "node index.mjs run --reverse --config ./config/build.config.json"
+    "reverse": "node index.mjs run --reverse --config ./config/build.config.json",
+    "test": "node index.mjs run --config ./config/build.config.json --task publish"
   },
   "bin": {
     "publisher-npm": "index.mjs"

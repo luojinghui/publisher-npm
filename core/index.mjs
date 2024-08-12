@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 16:43:40
+ * Last modified  : 2024-08-12 17:07:22
  */
 
 import inquirer from 'inquirer';
@@ -34,6 +34,7 @@ import {
   TaskConfigMap,
 } from './tool.mjs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 class Publisher {
   constructor() {
@@ -85,6 +86,50 @@ class Publisher {
       // 版本生成后，会创建对应的git commit和tab commit信息，其中"%s"是自动填充版本信息
       commitMessage: 'feat: publish release version v%s [#000000]',
     };
+  }
+
+  /**
+   * 交互获取推送信息
+   */
+  async run(options) {
+    try {
+      Logger.log('正在检测文件变动...');
+      // await checkUncommittedChanges();
+
+      await this.parseCommandConfig(options);
+
+      const { quickBeta, reverse } = this.commandConfig;
+
+      // 快速构建
+      if (quickBeta && !reverse) {
+        this.userSelectConfig = getQuickConfigMap(this.buildConfig.mirrorMap);
+        Logger.log('开始快速Beta版本构建...');
+      }
+
+      // 撤销版本
+      if (reverse) {
+        Logger.green('开始启动撤销版本流程');
+        await this.reverseVersion();
+      }
+
+      if (!reverse) {
+        // 创建构建配置
+        Logger.green('检测完成，开始准备发布版本');
+
+        await this.createBuildConfig();
+        await this.createVersion();
+        await this.buildPackage();
+        await this.publishPackage();
+      }
+    } catch (error) {
+      if (this.reverse) {
+        Logger.error('unpublish error', error);
+        return Promise.reject(error);
+      } else {
+        Logger.error('publish error', error);
+        return Promise.reject(error);
+      }
+    }
   }
 
   /**
@@ -142,54 +187,6 @@ class Publisher {
   }
 
   /**
-   * 交互获取推送信息
-   */
-  async run(options) {
-    try {
-      Logger.log('正在检测文件变动...');
-      // await checkUncommittedChanges();
-
-      await this.parseCommandConfig(options);
-
-      const { quickBeta, reverse } = this.commandConfig;
-
-      // 快速构建
-      if (quickBeta && !reverse) {
-        this.userSelectConfig = getQuickConfigMap(this.buildConfig.mirrorMap);
-        Logger.log('开始快速Beta版本构建...');
-      }
-
-      // 撤销版本
-      if (reverse) {
-        Logger.green('开始启动撤销版本流程');
-        await this.reverseVersion();
-        return;
-      }
-
-      // 创建构建配置
-      Logger.green('检测完成，开始准备发布版本');
-
-      if (!reverse) {
-        if (!quickBeta) {
-          await this.createBuildConfig();
-        }
-
-        await this.createVersion();
-        await this.buildPackage();
-        await this.publishPackage();
-      }
-    } catch (error) {
-      if (this.reverse) {
-        Logger.error('unpublish error', error);
-        return Promise.reject(error);
-      } else {
-        Logger.error('publish error', error);
-        return Promise.reject(error);
-      }
-    }
-  }
-
-  /**
    * 撤销版本
    */
   async reverseVersion() {
@@ -212,6 +209,12 @@ class Publisher {
    * 创建构建配置
    */
   async createBuildConfig() {
+    const { quickBeta } = this.commandConfig;
+
+    if (quickBeta) {
+      return;
+    }
+
     try {
       const { selectVersion, selectMirror } = this.commandConfig.taskConfig;
 
@@ -364,19 +367,24 @@ class Publisher {
 
     const { name, version } = readePackageJson();
     const { npmTag, mirrorType } = this.userSelectConfig;
-    const { projectName, mirrorMap, packager } = this.buildConfig;
+    const { projectName, mirrorMap, packager, basePath } = this.buildConfig;
 
     Logger.log(`开始推送${projectName} Npm包...`);
 
+    const packageDir = path.resolve(basePath);
+
+    Logger.log('package directory: ', packageDir);
+
     try {
       const mirror = mirrorMap[mirrorType];
+      const cd = `cd ${packageDir}`;
       const publishCommend = getPublishCommend(packager, npmTag, mirror);
 
       Logger.log('publish package: ', publishCommend);
       Logger.log('正在推送SDK包...');
 
       try {
-        await execShell(publishCommend, true);
+        await execShell(`${cd} && pwd && ${publishCommend}`, true);
       } catch (error) {}
 
       Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
