@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 15:32:50
+ * Last modified  : 2024-08-12 16:02:55
  */
 
 import inquirer from 'inquirer';
@@ -37,14 +37,6 @@ import path from 'path';
 
 class Publisher {
   constructor() {
-    // this.config = {
-    //   npmTag: '',
-    //   changeVersionType: ChangeVType.auto,
-    //   version: '',
-    //   updateVersionType: '',
-    //   mirrorType: '',
-    // };
-
     this.currentVersion = '';
 
     /**
@@ -90,8 +82,8 @@ class Publisher {
       mirrorMap: MirrorMap,
       // 项目名称，构建资源包时提醒
       projectName: 'Default Project',
-      // 版本生成后，会创建对应的git commit和tab commit信息，其中{version}是自动填充版本信息
-      commitMessage: 'feat: publish release version v{version} [#000000]',
+      // 版本生成后，会创建对应的git commit和tab commit信息，其中"%s"是自动填充版本信息
+      commitMessage: 'feat: publish release version v%s [#000000]',
     };
   }
 
@@ -226,6 +218,8 @@ class Publisher {
         await this.createMirrorType();
       }
 
+      console.log('this.userSelectConfig: ', this.userSelectConfig);
+
       Logger.log('发布版本配置信息', JSON.stringify(this.userSelectConfig));
     } catch (error) {
       Logger.error('版本发布失败，请检查', error);
@@ -239,13 +233,15 @@ class Publisher {
     this.userSelectConfig.npmTag = npmTag;
     // 通过 NPM 包版本类型
     const { release } = await inquirer.prompt(getQuestionNextVersion(this.currentVersion, npmTag));
-    this.userSelectConfig.release = release;
     const isInputVersion = release === ReleaseMap.manual;
 
     if (isInputVersion) {
       const { release } = await inquirer.prompt(QuestionInputVersion);
 
       this.userSelectConfig.release = release;
+    } else {
+      const parseRelease = release.split('->')[0];
+      this.userSelectConfig.release = parseRelease;
     }
   }
 
@@ -274,7 +270,7 @@ class Publisher {
       // 手动输入版本，更新packageJson文件，并提交代码
       if (!isNpmVersion) {
         const { commitMessage } = this.buildConfig;
-        const replaceCommitMessage = commitMessage.replace('{version}', release);
+        const replaceCommitMessage = commitMessage.replace('%s', release);
 
         updatePackageJsonVersion(release);
 
@@ -296,8 +292,9 @@ class Publisher {
         Logger.green('Git变更SDK Version提交成功: ', version);
       } else {
         // Npm Version更新版本
-        const tag = NPMTagMap[npmTag];
-        const npmVersion = `npm version ${updateVersionType} --preid=${tag} -m "${this.commitMessage} %s ${this.commitMessageAfter}"`;
+        const { npmTag, release } = this.userSelectConfig;
+        const { commitMessage } = this.buildConfig;
+        const npmVersion = `npm version ${release} --preid=${npmTag} -m "${commitMessage}"`;
 
         await execShell(npmVersion);
 

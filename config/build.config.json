@@ -5,5 +5,5 @@
     "XYLink": "https://fe-private-npm.xylink.com/"
   },
   "projectName": "Publisher NPM",
-  "commitMessage": "feat: publish release version {version} [#000000]"
+  "commitMessage": "feat: publish release version %s [#000000]"
 }
