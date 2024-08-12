@@ -5,7 +5,7 @@
   "main": "index.mjs",
   "scripts": {
     "build": "echo \"build  successfully\"",
-    "publish:beta": "node index.mjs run --beta --config ./config/build.config.json",
+    "publish:beta": "node index.mjs run --quickBeta --config ./config/build.config.json",
     "publish:release": "node index.mjs run --config ./config/build.config.json",
     "reverse": "node index.mjs run --reverse --config ./config/build.config.json"
   },
