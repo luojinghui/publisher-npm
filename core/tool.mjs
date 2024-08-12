@@ -256,8 +256,8 @@ export const getQuestionMirrorType = (mirrorMap) => {
  * @param { string } mirror - 选择的镜像地址
  * @return { string } - 返回撤销版本的命令
  */
-export const createReverseScript = async (packager, version, mirror) => {
-  const pak = await readePackageJson();
+export const createReverseScript = async (packager, version, mirror, packagePath) => {
+  const pak = await readePackageJson(packagePath);
   const name = pak.name;
   const module = `${name}@${version}`;
   const script = `${packager} unpublish ${module} --force --registry ${mirror}`;

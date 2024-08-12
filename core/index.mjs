@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 18:57:43
+ * Last modified  : 2024-08-12 18:58:48
  */
 
 import inquirer from 'inquirer';
@@ -209,7 +209,8 @@ class Publisher {
     const { release } = await inquirer.prompt(QuestionInputVersion);
     const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(mirrorMap));
     const mirror = mirrorMap[mirrorType];
-    const { script, module } = await createReverseScript(packager, release, mirror);
+    const packagePath = this.getPackageJsonPath();
+    const { script, module } = await createReverseScript(packager, release, mirror, packagePath);
 
     Logger.log('unpublish script: ', script);
     try {
