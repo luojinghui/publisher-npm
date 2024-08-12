@@ -1,6 +1,6 @@
 {
   "name": "publisher-npm",
-  "version": "0.12.1-beta.3",
+  "version": "0.12.1-beta.4",
   "description": "JavaScript library version management, build automation, and publishing tool for npm packages",
   "main": "index.mjs",
   "scripts": {
