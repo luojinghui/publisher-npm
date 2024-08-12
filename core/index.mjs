@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 17:07:22
+ * Last modified  : 2024-08-12 17:12:29
  */
 
 import inquirer from 'inquirer';
@@ -94,7 +94,7 @@ class Publisher {
   async run(options) {
     try {
       Logger.log('正在检测文件变动...');
-      // await checkUncommittedChanges();
+      await checkUncommittedChanges();
 
       await this.parseCommandConfig(options);
 
