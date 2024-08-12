@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 18:57:05
+ * Last modified  : 2024-08-12 18:57:43
  */
 
 import inquirer from 'inquirer';
@@ -177,9 +177,9 @@ class Publisher {
    */
   getPackageJsonPath() {
     const { packageJsonPath } = this.buildConfig;
-    const path = path.resolve(process.cwd(), packageJsonPath, 'package.json');
+    const packagePath = path.resolve(process.cwd(), packageJsonPath, 'package.json');
 
-    return path;
+    return packagePath;
   }
 
   parseTask() {
