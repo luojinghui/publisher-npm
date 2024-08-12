@@ -161,6 +161,8 @@ export const getQuestionNPMTag = (projectName) => {
     choices.push(NPMTagMap[key]);
   }
 
+  console.log('choices: ', choices);
+
   const QuestionTag = [
     {
       type: 'list',
@@ -172,6 +174,9 @@ export const getQuestionNPMTag = (projectName) => {
       },
     },
   ];
+
+  console.log("QuestionTag: ", QuestionTag);
+  
 
   return QuestionTag;
 };

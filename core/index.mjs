@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 19:03:27
+ * Last modified  : 2024-08-12 19:54:37
  */
 
 import inquirer from 'inquirer';
@@ -95,7 +95,7 @@ class Publisher {
   async run(options) {
     try {
       Logger.log('正在检测文件变动...');
-      await checkUncommittedChanges();
+      // await checkUncommittedChanges();
 
       await this.parseCommandConfig(options);
 
@@ -118,6 +118,7 @@ class Publisher {
         Logger.green('检测完成，开始准备发布版本');
 
         await this.createBuildConfig();
+        return;
         await this.createVersion();
         await this.buildPackage();
         await this.publishPackage();
@@ -229,6 +230,7 @@ class Publisher {
     if (quickBeta) {
       return;
     }
+    console.log('1');
 
     try {
       const { selectVersion, selectMirror } = this.commandConfig.taskConfig;
@@ -237,9 +239,11 @@ class Publisher {
         await this.createNpmVersion();
       }
 
+      console.log('2');
       if (selectMirror) {
         await this.createMirrorType();
       }
+      console.log('3');
 
       console.log('this.userSelectConfig: ', this.userSelectConfig);
 
@@ -252,9 +256,11 @@ class Publisher {
 
   async createNpmVersion() {
     // 获取发布库的TAG类型
+    console.log("1-1");
     const { npmTag } = await inquirer.prompt(getQuestionNPMTag(this.buildConfig.projectName));
     this.userSelectConfig.npmTag = npmTag;
     // 通过 NPM 包版本类型
+    console.log("1-2");
     const { release } = await inquirer.prompt(getQuestionNextVersion(this.currentVersion, npmTag));
     const isInputVersion = release === ReleaseMap.manual;
 
