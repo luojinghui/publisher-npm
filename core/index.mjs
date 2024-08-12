@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 18:58:48
+ * Last modified  : 2024-08-12 19:02:19
  */
 
 import inquirer from 'inquirer';
@@ -324,8 +324,8 @@ class Publisher {
         try {
           await execShell(gitTagPush);
         } catch (error) {}
-        const readePackageJson = this.getPackageJsonPath();
-        const version = readePackageJson(readePackageJson).version;
+        const packagePath = this.getPackageJsonPath();
+        const version = readePackageJson(packagePath).version;
         Logger.green('Npm变更SDK Version提交成功: ', version);
       }
     } catch (error) {
