@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 16:36:32
+ * Last modified  : 2024-08-12 16:42:10
  */
 
 import inquirer from 'inquirer';
@@ -154,15 +154,16 @@ class Publisher {
       const { quickBeta, reverse } = this.commandConfig;
 
       // 快速构建
-      if (quickBeta && !this.reverse) {
+      if (quickBeta && !reverse) {
         this.userSelectConfig = getQuickConfigMap(this.buildConfig.mirrorMap);
         Logger.log('开始快速Beta版本构建...');
       }
 
       // 撤销版本
-      if (this.reverse) {
+      if (reverse) {
         Logger.green('开始启动撤销版本流程');
         await this.reverseVersion();
+        return;
       }
 
       // 创建构建配置
@@ -192,17 +193,19 @@ class Publisher {
    * 撤销版本
    */
   async reverseVersion() {
+    const { mirrorMap, packager } = this.buildConfig;
+
     const { release } = await inquirer.prompt(QuestionInputVersion);
-    const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(this.mirrorMap));
-    const mirror = this.buildConfig.mirrorMap[mirrorType];
-    const { script, module } = await createReverseScript(this.buildConfig.packager, release, mirror);
+    const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(mirrorMap));
+    const mirror = mirrorMap[mirrorType];
+    const { script, module } = await createReverseScript(packager, release, mirror);
 
     Logger.log('unpublish script: ', script);
     try {
       await execShell(script, true);
     } catch (error) {}
 
-    Logger.log('撤销版本成功：', module);
+    Logger.green('撤销版本成功：', module);
   }
 
   /**
