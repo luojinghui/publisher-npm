@@ -2,10 +2,8 @@
   "buildScript": "build",
   "packager": "pnpm",
   "mirrorMap": {
-    "XYLink": "https://fe-private-npm.xylink.com/",
-    "TaoBao": "https://registry.npmmirror.com/"
+    "XYLink": "https://fe-private-npm.xylink.com/"
   },
   "projectName": "Publisher NPM",
-  "commitMessage": "feat: Publish Release Version:",
-  "commitMessageAfter": "[#000000]"
+  "commitMessage": "feat: publish release version {version} [#000000]"
 }

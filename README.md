@@ -37,14 +37,14 @@ pnpm add publisher-npm -D
 ## 快速开始
 
 ```base
-publisher-npm run [--config /path/build.config.json] [--configIgnore] [--beta] [--reverse] [-v] [-h]
+publisher-npm run [--config /path/build.config.json] [--configIgnore] [--quickBeta] [--reverse] [-v] [-h]
 ```
 
 ### 参数说明
 
 - `--config` 可选参数，配置后在后面跟随填写配置文件路径地址，会基于此配置更新配置内容，如果未指定，则会自动读取跟路径下的`build.config.json`文件
-- `--beta` 可选参数，配置是否快速构建 Beta 版本，默认是不构建，构建时默认使用第一个镜像仓库地址推送 NPM 包
 - `--configIgnore` 可选参数，是否省略配置，如果项目中仅需支持 NPM 镜像仓库，则无需配置`build.config.json`文件，使用此参数即可
+- `--quickBeta` 可选参数，配置是否快速构建 Beta 版本，默认是不构建，构建时默认使用第一个镜像仓库地址推送 NPM 包
 - `--reverse` 可选参数，是否执行撤销版本操作，如果启用，则需要输入版本号和选择仓库进行撤销版本操作
 
 ### 添加配置文件

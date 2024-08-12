@@ -1,13 +1,14 @@
 {
   "name": "publisher-npm",
-  "version": "0.12.1",
+  "version": "10.0.0",
   "description": "JavaScript library version management, build automation, and publishing tool for npm packages",
   "main": "index.mjs",
   "scripts": {
     "build": "echo \"build  successfully\"",
     "publish:beta": "node index.mjs run --beta --config ./config/build.config.json",
     "publish:release": "node index.mjs run --config ./config/build.config.json",
-    "reverse": "node index.mjs run --reverse --config ./config/build.config.json"
+    "reverse": "node index.mjs run --reverse --config ./config/build.config.json",
+    "reverse1": "node index.mjs run --configIgnore"
   },
   "bin": {
     "publisher-npm": "index.mjs"
@@ -31,6 +32,7 @@
   "devDependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
-    "inquirer": "^9.3.3"
+    "inquirer": "^9.3.3",
+    "semver": "^7.6.3"
   }
 }

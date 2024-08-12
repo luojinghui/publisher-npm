@@ -1,4 +1,9 @@
 {
   "prettier.singleQuote": true,
-  "prettier.jsxSingleQuote": true
+  "prettier.jsxSingleQuote": true,
+  "cSpell.words": [
+    "premajor",
+    "preminor",
+    "prepatch"
+  ]
 }

@@ -9,8 +9,12 @@ program
   .description('run npm publisher')
   .option('--config <path>', '[create build.config.js in project root directory]')
   .option('--configIgnore', '[use default config file, not create build.config.json file in project]')
-  .option('--beta', '[publish beta version quickly]')
+  .option('--quickBeta', '[publish beta version quickly]')
   .option('--reverse', '[unpublish version]')
+  .option(
+    '--task <task>',
+    '[custom tasks, type is string, support: selectVersion,selectMirror,commitTag,build,publish, example: --task "selectVersion-build"]'
+  )
   .action(async (options) => {
     try {
       await publisher.run(options);

@@ -2,15 +2,52 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
+import semver from 'semver';
 
 export const gitTagPush = `git push --tags`;
 export const gitAdd = 'git add .';
 export const gitPush = (branch) => `git push --set-upstream origin ${branch}`;
-export const gitCommit = (version, commit, commitAfter) => `git commit -m "${commit} ${version} ${commitAfter}"`;
-export const gitTag = (version, commit, commitAfter) =>
-  `git tag -a v${version} -m "${commit} ${version} ${commitAfter}"`;
+export const gitCommit = (commit) => `git commit -m "${commit}"`;
+export const gitTag = (commit, version) => `git tag -a v${version} -m "${commit}"`;
 export const gitStatus = 'git status --porcelain';
 export const gitCurrentBranch = 'git rev-parse --abbrev-ref HEAD';
+
+/**
+ * NPM Tag枚举
+ */
+export const NPMTagMap = {
+  beta: 'beta',
+  private: 'private',
+  release: 'latest',
+  rc: 'rc',
+  alpha: 'alpha',
+};
+
+/**
+ * 默认镜像地址
+ * 如需添加其他配置，请在初始化配置中填充，会自动合并当前配置
+ */
+export const MirrorMap = {
+  NPM: 'https://registry.npmjs.org/',
+};
+
+/**
+ * NPM 版本变动类型
+ */
+export const ReleaseMap = {
+  prerelease: 'prerelease',
+  patch: 'patch',
+  prepatch: 'prepatch',
+  minor: 'minor',
+  preminor: 'preminor',
+  major: 'major',
+  premajor: 'premajor',
+  manual: 'manual input version',
+};
+
+export const FilterReleaseMap = ['patch', 'minor', 'major', 'manual'];
+
+export const TaskConfigMap = ['selectVersion', 'selectMirror', 'commitTag', 'build', 'publish'];
 
 /**
  * 获取更新镜像地址配置
@@ -37,34 +74,9 @@ export const getRegistry = (packager, mirrorMap, mirrorType) => {
  * @returns { string } - 推送版本的命令配置
  */
 export const getPublishCommend = (packager, npmTag, mirror) => {
-  const tag = TagMap[npmTag];
+  const tag = NPMTagMap[npmTag];
 
   return `${packager} publish --tag ${tag} --access public --registry ${mirror} --no-git-checks`;
-};
-
-/**
- * 版本更新方式枚举
- */
-export const ChangeVType = {
-  auto: 'auto',
-  manual: 'manual',
-};
-
-/**
- * Tag枚举
- */
-export const TagMap = {
-  beta: 'beta',
-  private: 'private',
-  release: 'latest',
-};
-
-/**
- * 默认镜像地址
- * 如需添加其他配置，请在初始化配置中填充，会自动合并当前配置
- */
-export const MirrorMap = {
-  Npm: 'https://registry.npmjs.org/',
 };
 
 /**
@@ -116,11 +128,9 @@ export function validateVersion(version) {
   // 正式版本规则
   const officialPattern = /^(\d+)\.(\d+)\.(\d+)$/;
   // Beta版本规则
-  const betaPattern = /^(\d+)\.(\d+)\.(\d+)-beta\.(\d+)$/;
-  // 私有版本规则
-  const privatePattern = /^(\d+)\.(\d+)\.(\d+)-private\.(\d+)$/;
+  const betaPattern = /^(\d+)\.(\d+)\.(\d+)-[a-zA-Z]+\.(\d+)$/;
 
-  if (officialPattern.test(version) || betaPattern.test(version) || privatePattern.test(version)) {
+  if (officialPattern.test(version) || betaPattern.test(version)) {
     return true;
   }
 
@@ -130,33 +140,27 @@ export function validateVersion(version) {
 /**
  * 快速构建配置
  *
- * 当前支持的参数：--beta，使用方式：node build.mjs --beta
+ * 当前支持的参数：--beta，使用方式：node build.mjs --quickBeta
  */
-export const getQuickConfigMap = (mirrorMap, npmTag) => {
+export const getQuickConfigMap = (mirrorMap) => {
   const keys = Object.keys(mirrorMap);
   const firstMirrorType = keys[0];
 
-  const configMap = {
-    [TagMap.beta]: {
-      npmTag: TagMap.beta,
-      changeVersionType: ChangeVType.auto,
-      version: '',
-      updateVersionType: 'prerelease',
-      mirrorType: firstMirrorType,
-    },
+  return {
+    npmTag: NPMTag.beta,
+    release: ReleaseMap.prerelease,
+    mirrorType: firstMirrorType,
   };
-
-  return configMap[npmTag];
 };
 
 /**
  * 获取版本更新方式问题配置
  */
-export const getQuestionTag = (projectName) => {
+export const getQuestionNPMTag = (projectName) => {
   const choices = [];
 
-  for (let key in TagMap) {
-    choices.push(key);
+  for (const key in NPMTagMap) {
+    choices.push(NPMTagMap[key]);
   }
 
   const QuestionTag = [
@@ -169,15 +173,6 @@ export const getQuestionTag = (projectName) => {
         return val.toLowerCase();
       },
     },
-    {
-      type: 'list',
-      name: 'changeVersionType',
-      message: `选择更新版本方式，规则如下：
-      auto: 基于Npm Version自动演进版本
-      manual: 手动输入版本`,
-      choices: [ChangeVType.auto, ChangeVType.manual],
-      default: ChangeVType.auto,
-    },
   ];
 
   return QuestionTag;
@@ -189,29 +184,8 @@ export const getQuestionTag = (projectName) => {
 export const QuestionInputVersion = [
   {
     type: 'input',
-    name: 'version',
-    message: `请输入需要发布的版本号，规则如下：
-      正式版本：[MAJOR.MINOR.PATCH]
-      测试版本：[MAJOR.MINOR.PATCH-beta.BUILD]
-      私有版本：[MAJOR.MINOR.PATCH-private.BUILD]\n`,
-    validate: (version) => {
-      if (validateVersion(version)) {
-        return true;
-      }
-
-      return '版本号不符合规则，请重新输入\n';
-    },
-  },
-];
-
-/**
- * 输入版本方式配置
- */
-export const InputReverseVersion = [
-  {
-    type: 'input',
-    name: 'reverse_version',
-    message: '请输入需要撤销的版本号\n',
+    name: 'release',
+    message: `请手动输入版本号，规则如下：\n正式版本：[MAJOR.MINOR.PATCH]\n测试版本：[MAJOR.MINOR.PATCH-[TAG].BUILD]\n`,
     validate: (version) => {
       if (validateVersion(version)) {
         return true;
@@ -225,38 +199,38 @@ export const InputReverseVersion = [
 /**
  * 获取更新版本的方式问题配置
  */
-export const QuestionSwitchVersion = (npmTag) => {
-  const tag = TagMap[npmTag];
+export const getQuestionNextVersion = (currentVersion, npmTag) => {
+  const isReleaseVersion = npmTag === NPMTagMap.release;
+  const prerelease = semver.inc(currentVersion, 'prerelease', npmTag);
+  const patch = semver.inc(currentVersion, 'patch', npmTag);
+  const prepatch = semver.inc(currentVersion, 'prepatch', npmTag);
+  const minor = semver.inc(currentVersion, 'minor', npmTag);
+  const preminor = semver.inc(currentVersion, 'preminor', npmTag);
+  const major = semver.inc(currentVersion, 'major', npmTag);
+  const premajor = semver.inc(currentVersion, 'premajor', npmTag);
   const versionMap = {
-    prerelease: `prerelease(常规更新): 1.0.0 -> 1.0.1-${npmTag}.0 -> 1.0.1-${npmTag}.1`,
-    patch: `patch(小版本): v1.0.0 -> v1.0.1`,
-    minor: `minor(次版本): 1.0.0 -> 1.1.0`,
-    major: `major(大版本): 1.0.0 -> 2.0.0`,
-    prepatch: `prepatch: 1.0.0-${npmTag}.0 -> 1.0.1-${npmTag}.0`,
-    preminor: `preminor: 1.0.0-${npmTag}.0 -> 1.1.0-${npmTag}.0`,
-    premajor: `premajor: 1.0.0-${npmTag}.0 -> 2.0.0-${npmTag}.0`,
+    prerelease: `prerelease->${prerelease}`,
+    patch: `patch->${patch}`,
+    prepatch: `prepatch->${prepatch}`,
+    minor: `minor->${minor}`,
+    preminor: `preminor->${preminor}`,
+    major: `major->${major}`,
+    premajor: `premajor->${premajor}`,
+    manual: ReleaseMap.manual,
   };
-  const latestFilterMap = ['prerelease', 'prepatch', 'preminor', 'premajor'];
-  let choices = [];
-  let message = '';
-
-  if (tag === 'latest') {
-    message = `请选择版本更新规则，规则如下：\n[MAJOR, MINOR, PATCH]\n`;
-  } else {
-    message = `请选择版本更新规则，规则如下：\n[MAJOR, MINOR, PATCH-${npmTag}.BUILD]\n`;
-  }
+  const currentVerMsg = chalk.green(`当前版本: ${currentVersion}`);
+  const choices = [];
+  const message = `请选择版本，${currentVerMsg}`;
 
   for (let key in versionMap) {
-    if (tag === 'latest' && !latestFilterMap.includes(key)) {
-      message += `${versionMap[key]}\n`;
-      choices.push(key);
-    } else if (tag !== 'latest') {
-      message += `${versionMap[key]}\n`;
-      choices.push(key);
+    if (isReleaseVersion && FilterReleaseMap.includes(key)) {
+      choices.push(versionMap[key]);
+    } else if (!isReleaseVersion) {
+      choices.push(versionMap[key]);
     }
   }
 
-  return [{ type: 'list', name: 'updateVersionType', message, choices }];
+  return [{ type: 'list', name: 'release', message, choices, loop: false }];
 };
 
 /**
@@ -268,7 +242,7 @@ export const getQuestionMirrorType = (mirrorMap) => {
 
   for (let key in mirrorMap) {
     choices.push(key);
-    message += `\n${key}镜像: ${mirrorMap[key]}`;
+    message += `\n${key}: ${mirrorMap[key]}`;
   }
 
   const QuestionMirrorType = [{ type: 'list', name: 'mirrorType', message, choices: choices }];
