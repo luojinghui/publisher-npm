@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 16:17:28
+ * Last modified  : 2024-08-12 16:36:32
  */
 
 import inquirer from 'inquirer';
@@ -151,8 +151,10 @@ class Publisher {
 
       await this.parseCommandConfig(options);
 
+      const { quickBeta, reverse } = this.commandConfig;
+
       // 快速构建
-      if (this.commandConfig.quickBeta && !this.reverse) {
+      if (quickBeta && !this.reverse) {
         this.userSelectConfig = getQuickConfigMap(this.buildConfig.mirrorMap);
         Logger.log('开始快速Beta版本构建...');
       }
@@ -166,8 +168,8 @@ class Publisher {
       // 创建构建配置
       Logger.green('检测完成，开始准备发布版本');
 
-      if (!this.reverse) {
-        if (!this.commandConfig.quickBeta) {
+      if (!reverse) {
+        if (!quickBeta) {
           await this.createBuildConfig();
         }
 
@@ -190,10 +192,10 @@ class Publisher {
    * 撤销版本
    */
   async reverseVersion() {
-    const { reverse_version } = await inquirer.prompt(QuestionInputVersion);
+    const { release } = await inquirer.prompt(QuestionInputVersion);
     const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(this.mirrorMap));
-    const mirror = this.mirrorMap[mirrorType];
-    const { script, module } = await createReverseScript(this.packager, reverse_version, mirror);
+    const mirror = this.buildConfig.mirrorMap[mirrorType];
+    const { script, module } = await createReverseScript(this.buildConfig.packager, release, mirror);
 
     Logger.log('unpublish script: ', script);
     try {
@@ -350,14 +352,22 @@ class Publisher {
    * 推送Npm Package
    */
   async publishPackage() {
-    const { name, version } = readePackageJson();
-    const { mirrorType, npmTag } = this.config;
+    const { publish } = this.commandConfig.taskConfig;
 
-    Logger.log(`开始推送${this.projectName} Npm包...`);
+    if (!publish) {
+      Logger.log('忽略发布版本！');
+      return;
+    }
+
+    const { name, version } = readePackageJson();
+    const { npmTag, mirrorType } = this.userSelectConfig;
+    const { projectName, mirrorMap, packager } = this.buildConfig;
+
+    Logger.log(`开始推送${projectName} Npm包...`);
 
     try {
-      const mirror = this.mirrorMap[mirrorType];
-      const publishCommend = getPublishCommend(this.packager, npmTag, mirror);
+      const mirror = mirrorMap[mirrorType];
+      const publishCommend = getPublishCommend(packager, npmTag, mirror);
 
       Logger.log('publish package: ', publishCommend);
       Logger.log('正在推送SDK包...');

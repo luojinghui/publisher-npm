@@ -74,9 +74,7 @@ export const getRegistry = (packager, mirrorMap, mirrorType) => {
  * @returns { string } - 推送版本的命令配置
  */
 export const getPublishCommend = (packager, npmTag, mirror) => {
-  const tag = NPMTagMap[npmTag];
-
-  return `${packager} publish --tag ${tag} --access public --registry ${mirror} --no-git-checks`;
+  return `${packager} publish --tag ${npmTag} --access public --registry ${mirror} --no-git-checks`;
 };
 
 /**
