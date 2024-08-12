@@ -145,7 +145,7 @@ export const getQuickConfigMap = (mirrorMap) => {
   const firstMirrorType = keys[0];
 
   return {
-    npmTag: NPMTag.beta,
+    npmTag: NPMTagMap.beta,
     release: ReleaseMap.prerelease,
     mirrorType: firstMirrorType,
   };
