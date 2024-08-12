@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 19:55:55
+ * Last modified  : 2024-08-12 19:57:01
  */
 
 import inquirer from 'inquirer';
@@ -118,7 +118,6 @@ class Publisher {
         Logger.green('检测完成，开始准备发布版本');
 
         await this.createBuildConfig();
-        return;
         await this.createVersion();
         await this.buildPackage();
         await this.publishPackage();
@@ -243,7 +242,6 @@ class Publisher {
       if (selectMirror) {
         await this.createMirrorType();
       }
-      console.log('3');
 
       console.log('this.userSelectConfig: ', this.userSelectConfig);
 
