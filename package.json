@@ -29,10 +29,10 @@
   },
   "repository": "https://github.com/luojinghui/publisher-npm.git",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
-    "inquirer": "^9.3.3",
+    "inquirer": "^10.1.8",
     "semver": "^7.6.3"
   }
 }
