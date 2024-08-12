@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 19:02:19
+ * Last modified  : 2024-08-12 19:03:27
  */
 
 import inquirer from 'inquirer';
@@ -163,8 +163,8 @@ class Publisher {
 
     this.buildConfig = { ...this.buildConfig, ...configFileContent };
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
-    const packageJsonpath = this.getPackageJsonPath();
-    this.currentVersion = readePackageJson(packageJsonpath).version;
+    const packagePath = this.getPackageJsonPath();
+    this.currentVersion = readePackageJson(packagePath).version;
 
     console.log('this.commandConfig: ', this.commandConfig);
     console.log('this.buildConfig: ', this.buildConfig);
@@ -380,8 +380,8 @@ class Publisher {
       return;
     }
 
-    const readePackageJson = this.getPackageJsonPath();
-    const { name, version } = readePackageJson(readePackageJson);
+    const packagePath = this.getPackageJsonPath();
+    const { name, version } = readePackageJson(packagePath);
     const { npmTag, mirrorType } = this.userSelectConfig;
     const { projectName, mirrorMap, packager, basePath } = this.buildConfig;
 
