@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:23:17
+ * Last modified  : 2024-08-13 11:25:31
  */
 
 import inquirer from 'inquirer';
@@ -287,10 +287,10 @@ class Publisher {
     try {
       // 手动输入版本
       if (!isNpmVersion) {
-        this.createManualVersion();
+        await this.createManualVersion();
       } else {
         // Npm Version更新版本
-        this.createAutoNpmVersion();
+        await this.createAutoNpmVersion();
       }
     } catch (error) {
       Logger.error('Npm 版本生成失败，请检查', error);
@@ -322,7 +322,6 @@ class Publisher {
       await execShell(gitAddTagCommand);
       await execShell(gitTagPushCommand);
     } catch (error) {}
-    this.nextVersion = release;
     Logger.green('Git变更SDK Version提交成功: ', release);
   }
 
@@ -350,8 +349,7 @@ class Publisher {
       await execShell(gitTagPushCommand);
     } catch (error) {}
 
-    this.nextVersion = nextVersion;
-    Logger.green('Npm变更SDK Version提交成功: ', this.nextVersion);
+    Logger.green('Npm变更SDK Version提交成功: ', nextVersion);
   }
 
   /**
@@ -400,7 +398,7 @@ class Publisher {
     }
 
     const packagePath = this.getPackageJsonPath();
-    const { name } = readePackageJson(packagePath);
+    const { name, version } = readePackageJson(packagePath);
     const { npmTag, mirrorType } = this.userSelectConfig;
     const { projectName, mirrorMap, packager, buildDir } = this.buildConfig;
     const packageDir = path.resolve(buildDir);
@@ -420,7 +418,7 @@ class Publisher {
         await execShell(`${cd} && pwd && ${publishCommend}`, true);
       } catch (error) {}
 
-      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${this.nextVersion}`);
+      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
