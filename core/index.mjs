@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 14:54:23
+ * Last modified  : 2024-08-13 15:19:20
  */
 
 import inquirer from 'inquirer';
@@ -128,14 +128,9 @@ class Publisher {
         // 创建构建配置
         Logger.green('检测完成，开始准备发布版本');
 
-        console.log(111111);
-
         await this.createBuildConfig();
-        console.log(222222);
         await this.createVersion();
-        console.log(333333);
         await this.buildPackage();
-        console.log(44444);
         await this.publishPackage();
       }
     } catch (error) {
@@ -302,7 +297,7 @@ class Publisher {
     const nextVersion = isNpmVersion ? semver.inc(this.currentVersion, release, npmTag) : release;
 
     try {
-      // await this.createManualVersion(nextVersion);
+      await this.createManualVersion(nextVersion);
     } catch (error) {
       Logger.error('Npm 版本生成失败，请检查', error);
 
