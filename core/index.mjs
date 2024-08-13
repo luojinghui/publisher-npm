@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:00:25
+ * Last modified  : 2024-08-13 11:20:55
  */
 
 import inquirer from 'inquirer';
@@ -39,6 +39,7 @@ import semver from 'semver';
 class Publisher {
   constructor() {
     this.currentVersion = '';
+    this.nextVersion = '';
 
     /**
      * 用户在命令行执行的结果配置
@@ -320,6 +321,7 @@ class Publisher {
       await execShell(gitAddTagCommand);
       await execShell(gitTagPushCommand);
     } catch (error) {}
+    this.nextVersion = release;
     Logger.green('Git变更SDK Version提交成功: ', release);
   }
 
@@ -329,6 +331,7 @@ class Publisher {
 
     const { npmTag, release } = this.userSelectConfig;
     const nextVersion = semver.inc(this.currentVersion, release, npmTag);
+
     const replaceCommitMessage = commitMessage.replace('%s', nextVersion);
     const npmVersion = `npm version ${release} --preid=${npmTag} -m "${replaceCommitMessage}"`;
 
@@ -346,10 +349,8 @@ class Publisher {
       await execShell(gitTagPushCommand);
     } catch (error) {}
 
-    const packagePath = this.getPackageJsonPath();
-    const version = readePackageJson(packagePath).version;
-
-    Logger.green('Npm变更SDK Version提交成功: ', version);
+    this.nextVersion = nextVersion;
+    Logger.green('Npm变更SDK Version提交成功: ', this.nextVersion);
   }
 
   /**
@@ -398,7 +399,7 @@ class Publisher {
     }
 
     const packagePath = this.getPackageJsonPath();
-    const { name, version } = readePackageJson(packagePath);
+    const { name } = readePackageJson(packagePath);
     const { npmTag, mirrorType } = this.userSelectConfig;
     const { projectName, mirrorMap, packager, buildDir } = this.buildConfig;
     const packageDir = path.resolve(buildDir);
@@ -418,7 +419,7 @@ class Publisher {
         await execShell(`${cd} && pwd && ${publishCommend}`, true);
       } catch (error) {}
 
-      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
+      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${this.nextVersion}`);
     } catch (error) {
       Logger.error('publish package error:', error);
     }
