@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 10:03:40
+ * Last modified  : 2024-08-13 10:37:27
  */
 
 import inquirer from 'inquirer';
@@ -17,13 +17,13 @@ import {
   readePackageJson,
   updatePackageJsonVersion,
   execShell,
-  gitAdd,
+  gitAddCommand,
   gitCommit,
   gitPush,
   getCurrentBranch,
   NPMTagMap,
   gitTag,
-  gitTagPush,
+  gitTagPushCommand,
   MirrorMap,
   getQuickConfigMap,
   getPublishCommend,
@@ -95,7 +95,7 @@ class Publisher {
   async run(options) {
     try {
       Logger.log('正在检测文件变动...');
-      // await checkUncommittedChanges();
+      await checkUncommittedChanges();
 
       await this.parseCommandConfig(options);
 
@@ -137,8 +137,6 @@ class Publisher {
    * 解析配置文件中的内容，同步给构建模块
    */
   async parseCommandConfig(options) {
-    console.log('options: ', options);
-
     this.commandConfig = { ...this.commandConfig, ...options };
     const { config, configIgnore } = this.commandConfig;
     let configFileContent = {};
@@ -165,9 +163,6 @@ class Publisher {
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
     const packagePath = this.getPackageJsonPath();
     this.currentVersion = readePackageJson(packagePath).version;
-
-    console.log('this.commandConfig: ', this.commandConfig);
-    console.log('this.buildConfig: ', this.buildConfig);
   }
 
   /**
@@ -229,7 +224,6 @@ class Publisher {
     if (quickBeta) {
       return;
     }
-    console.log('1');
 
     try {
       const { selectVersion, selectMirror } = this.commandConfig.taskConfig;
@@ -238,12 +232,9 @@ class Publisher {
         await this.createNpmVersion();
       }
 
-      console.log('2');
       if (selectMirror) {
         await this.createMirrorType();
       }
-
-      console.log('this.userSelectConfig: ', this.userSelectConfig);
 
       Logger.log('发布版本配置信息', JSON.stringify(this.userSelectConfig));
     } catch (error) {
@@ -288,32 +279,31 @@ class Publisher {
     }
 
     Logger.log('开始更新Npm Version...');
-    const { npmTag, release } = this.userSelectConfig;
+    const { release } = this.userSelectConfig;
     const isNpmVersion = !!ReleaseMap[release];
+    const { commitMessage } = this.buildConfig;
+    const replaceCommitMessage = commitMessage.replace('%s', release);
+    const branch = await getCurrentBranch();
+    const gitCommitCommand = gitCommit(replaceCommitMessage);
+    const gitPushCommand = gitPush(branch.trim());
+    const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
 
     try {
       // 手动输入版本，更新packageJson文件，并提交代码
       if (!isNpmVersion) {
-        const { commitMessage } = this.buildConfig;
-        const replaceCommitMessage = commitMessage.replace('%s', release);
         const packageJsonPath = this.getPackageJsonPath();
         updatePackageJsonVersion(packageJsonPath, release);
-
-        const branch = await getCurrentBranch();
-        const commit = gitCommit(replaceCommitMessage);
-        const gitCommend = `${gitAdd} && ${commit} && ${gitPush(branch.trim())}`;
+        const gitAddTagCommand = gitTag(replaceCommitMessage, release);
 
         try {
-          await execShell(gitCommend, true);
+          await execShell(gitCommitPushCommand, true);
+          Logger.green('手动版本变动Git提交成功');
         } catch (error) {}
-
-        Logger.green('手动版本变动Git提交成功');
 
         try {
-          await execShell(gitTag(replaceCommitMessage, release));
-          await execShell(gitTagPush);
+          await execShell(gitAddTagCommand);
+          await execShell(gitTagPushCommand);
         } catch (error) {}
-
         Logger.green('Git变更SDK Version提交成功: ', release);
       } else {
         // Npm Version更新版本
@@ -321,14 +311,16 @@ class Publisher {
         const { commitMessage } = this.buildConfig;
         const { projectDir } = this.buildConfig;
         const projectPath = path.resolve(process.cwd(), projectDir);
+        const pwdPath = path.resolve(process.cwd());
         const npmVersion = `npm version ${release} --preid=${npmTag} -m "${commitMessage}"`;
 
-        Logger.log('projectPath: ', projectPath);
         await execShell(`cd ${projectPath} && pwd && ${npmVersion}`);
 
         try {
-          await execShell(gitTagPush);
+          await execShell(gitCommitPushCommand, true);
+          await execShell(gitTagPushCommand);
         } catch (error) {}
+
         const packagePath = this.getPackageJsonPath();
         const version = readePackageJson(packagePath).version;
         Logger.green('Npm变更SDK Version提交成功: ', version);

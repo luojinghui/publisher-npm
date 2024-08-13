@@ -4,8 +4,8 @@ import path from 'path';
 import chalk from 'chalk';
 import semver from 'semver';
 
-export const gitTagPush = `git push --tags`;
-export const gitAdd = 'git add .';
+export const gitTagPushCommand = `git push --tags`;
+export const gitAddCommand = 'git add .';
 export const gitPush = (branch) => `git push --set-upstream origin ${branch}`;
 export const gitCommit = (commit) => `git commit -m "${commit}"`;
 export const gitTag = (commit, version) => `git tag -a v${version} -m "${commit}"`;
