@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:20:55
+ * Last modified  : 2024-08-13 11:23:17
  */
 
 import inquirer from 'inquirer';
@@ -301,6 +301,7 @@ class Publisher {
 
   async createManualVersion() {
     const { commitMessage } = this.buildConfig;
+    const { release } = this.userSelectConfig;
     const replaceCommitMessage = commitMessage.replace('%s', release);
     const gitCommitCommand = gitCommit(replaceCommitMessage);
     // git push
