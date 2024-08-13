@@ -127,8 +127,10 @@ export function validateVersion(version) {
   const officialPattern = /^(\d+)\.(\d+)\.(\d+)$/;
   // Beta版本规则
   const betaPattern = /^(\d+)\.(\d+)\.(\d+)-[a-zA-Z]+\.(\d+)$/;
+  // Release版本规则
+  const releasePattern = /^(\d+)\.(\d+)\.(\d+)-(\d+)$/;
 
-  if (officialPattern.test(version) || betaPattern.test(version)) {
+  if (officialPattern.test(version) || betaPattern.test(version) || releasePattern.test(version)) {
     return true;
   }
 
