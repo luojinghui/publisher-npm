@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 10:02:28
+ * Last modified  : 2024-08-13 10:03:40
  */
 
 import inquirer from 'inquirer';
@@ -388,13 +388,11 @@ class Publisher {
     const packagePath = this.getPackageJsonPath();
     const { name, version } = readePackageJson(packagePath);
     const { npmTag, mirrorType } = this.userSelectConfig;
-    const { projectName, mirrorMap, packager, basePath } = this.buildConfig;
+    const { projectName, mirrorMap, packager, buildDir } = this.buildConfig;
+    const packageDir = path.resolve(buildDir);
 
     Logger.log(`开始推送${projectName} Npm包...`);
-
-    const packageDir = path.resolve(basePath);
-
-    Logger.log('package directory: ', packageDir);
+    Logger.log('build package directory: ', packageDir);
 
     try {
       const mirror = mirrorMap[mirrorType];
