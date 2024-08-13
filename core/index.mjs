@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 10:37:27
+ * Last modified  : 2024-08-13 11:00:25
  */
 
 import inquirer from 'inquirer';
@@ -34,6 +34,7 @@ import {
   TaskConfigMap,
 } from './tool.mjs';
 import path from 'path';
+import semver from 'semver';
 
 class Publisher {
   constructor() {
@@ -281,55 +282,74 @@ class Publisher {
     Logger.log('开始更新Npm Version...');
     const { release } = this.userSelectConfig;
     const isNpmVersion = !!ReleaseMap[release];
-    const { commitMessage } = this.buildConfig;
-    const replaceCommitMessage = commitMessage.replace('%s', release);
-    const branch = await getCurrentBranch();
-    const gitCommitCommand = gitCommit(replaceCommitMessage);
-    const gitPushCommand = gitPush(branch.trim());
-    const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
 
     try {
-      // 手动输入版本，更新packageJson文件，并提交代码
+      // 手动输入版本
       if (!isNpmVersion) {
-        const packageJsonPath = this.getPackageJsonPath();
-        updatePackageJsonVersion(packageJsonPath, release);
-        const gitAddTagCommand = gitTag(replaceCommitMessage, release);
-
-        try {
-          await execShell(gitCommitPushCommand, true);
-          Logger.green('手动版本变动Git提交成功');
-        } catch (error) {}
-
-        try {
-          await execShell(gitAddTagCommand);
-          await execShell(gitTagPushCommand);
-        } catch (error) {}
-        Logger.green('Git变更SDK Version提交成功: ', release);
+        this.createManualVersion();
       } else {
         // Npm Version更新版本
-        const { npmTag, release } = this.userSelectConfig;
-        const { commitMessage } = this.buildConfig;
-        const { projectDir } = this.buildConfig;
-        const projectPath = path.resolve(process.cwd(), projectDir);
-        const pwdPath = path.resolve(process.cwd());
-        const npmVersion = `npm version ${release} --preid=${npmTag} -m "${commitMessage}"`;
-
-        await execShell(`cd ${projectPath} && pwd && ${npmVersion}`);
-
-        try {
-          await execShell(gitCommitPushCommand, true);
-          await execShell(gitTagPushCommand);
-        } catch (error) {}
-
-        const packagePath = this.getPackageJsonPath();
-        const version = readePackageJson(packagePath).version;
-        Logger.green('Npm变更SDK Version提交成功: ', version);
+        this.createAutoNpmVersion();
       }
     } catch (error) {
       Logger.error('Npm 版本生成失败，请检查', error);
 
       return Promise.reject('npm version error');
     }
+  }
+
+  async createManualVersion() {
+    const { commitMessage } = this.buildConfig;
+    const replaceCommitMessage = commitMessage.replace('%s', release);
+    const gitCommitCommand = gitCommit(replaceCommitMessage);
+    // git push
+    const branch = await getCurrentBranch();
+    const gitPushCommand = gitPush(branch.trim());
+    const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
+    // git tag
+    const gitAddTagCommand = gitTag(replaceCommitMessage, release);
+    const packageJsonPath = this.getPackageJsonPath();
+    updatePackageJsonVersion(packageJsonPath, release);
+
+    try {
+      await execShell(gitCommitPushCommand, true);
+      Logger.green('手动版本变动Git提交成功');
+    } catch (error) {}
+
+    try {
+      await execShell(gitAddTagCommand);
+      await execShell(gitTagPushCommand);
+    } catch (error) {}
+    Logger.green('Git变更SDK Version提交成功: ', release);
+  }
+
+  async createAutoNpmVersion() {
+    const { commitMessage, projectDir } = this.buildConfig;
+    const projectPath = path.resolve(process.cwd(), projectDir);
+
+    const { npmTag, release } = this.userSelectConfig;
+    const nextVersion = semver.inc(this.currentVersion, release, npmTag);
+    const replaceCommitMessage = commitMessage.replace('%s', nextVersion);
+    const npmVersion = `npm version ${release} --preid=${npmTag} -m "${replaceCommitMessage}"`;
+
+    await execShell(`cd ${projectPath} && pwd && ${npmVersion}`);
+
+    // git push
+    const branch = await getCurrentBranch();
+    const gitPushCommand = gitPush(branch.trim());
+    const gitCommitCommand = gitCommit(replaceCommitMessage);
+    // git commit
+    const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
+
+    try {
+      await execShell(gitCommitPushCommand, true);
+      await execShell(gitTagPushCommand);
+    } catch (error) {}
+
+    const packagePath = this.getPackageJsonPath();
+    const version = readePackageJson(packagePath).version;
+
+    Logger.green('Npm变更SDK Version提交成功: ', version);
   }
 
   /**
