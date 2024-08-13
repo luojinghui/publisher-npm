@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:27:02
+ * Last modified  : 2024-08-13 11:27:45
  */
 
 import inquirer from 'inquirer';
@@ -354,7 +354,7 @@ class Publisher {
       await execShell(gitTagPushCommand);
     } catch (error) {}
 
-    Logger.green('Npm变更SDK Version提交成功: ', nextVersion);
+    Logger.green('Npm变更Version提交成功: ', nextVersion);
   }
 
   /**
@@ -417,7 +417,7 @@ class Publisher {
       const publishCommend = getPublishCommend(packager, npmTag, mirror);
 
       Logger.log('publish package: ', publishCommend);
-      Logger.log('正在推送SDK包...');
+      Logger.log('正在推送软件包...');
 
       try {
         await execShell(`${cd} && pwd && ${publishCommend}`, true);
