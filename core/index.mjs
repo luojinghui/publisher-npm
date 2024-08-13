@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-12 19:57:01
+ * Last modified  : 2024-08-13 10:02:28
  */
 
 import inquirer from 'inquirer';
@@ -73,9 +73,9 @@ class Publisher {
       // 构建Script脚本命令
       buildScript: '',
       // 构建包的基础路径，默认是项目根目录，如需推送其他目录资源，请指定
-      basePath: '.',
-      // 项目的package.json路径，默认是项目根目录下的位置
-      packageJsonPath: '.',
+      buildDir: '.',
+      // 项目根目录，在Monorepo项目下需要指定子包的目录，默认是当前项目根目录
+      projectDir: '.',
       // 包管理器，默认是pnpm
       packager: 'pnpm',
       // 镜像配置列表，key是镜像名，value是镜像地址，配置后将在命令行发布镜像选择中罗列出来
@@ -176,8 +176,8 @@ class Publisher {
    * @returns { string } - package.json文件路径
    */
   getPackageJsonPath() {
-    const { packageJsonPath } = this.buildConfig;
-    const packagePath = path.resolve(process.cwd(), packageJsonPath, 'package.json');
+    const { projectDir } = this.buildConfig;
+    const packagePath = path.resolve(process.cwd(), projectDir, 'package.json');
 
     return packagePath;
   }
@@ -314,14 +314,17 @@ class Publisher {
           await execShell(gitTagPush);
         } catch (error) {}
 
-        Logger.green('Git变更SDK Version提交成功: ', version);
+        Logger.green('Git变更SDK Version提交成功: ', release);
       } else {
         // Npm Version更新版本
         const { npmTag, release } = this.userSelectConfig;
         const { commitMessage } = this.buildConfig;
+        const { projectDir } = this.buildConfig;
+        const projectPath = path.resolve(process.cwd(), projectDir);
         const npmVersion = `npm version ${release} --preid=${npmTag} -m "${commitMessage}"`;
 
-        await execShell(npmVersion);
+        Logger.log('projectPath: ', projectPath);
+        await execShell(`cd ${projectPath} && pwd && ${npmVersion}`);
 
         try {
           await execShell(gitTagPush);
