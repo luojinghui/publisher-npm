@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:25:31
+ * Last modified  : 2024-08-13 11:27:02
  */
 
 import inquirer from 'inquirer';
@@ -102,6 +102,11 @@ class Publisher {
       await this.parseCommandConfig(options);
 
       const { quickBeta, reverse } = this.commandConfig;
+
+      const packagePath = this.getPackageJsonPath();
+      const { version } = readePackageJson(packagePath);
+
+      Logger.green('当前版本号：', version);
 
       // 快速构建
       if (quickBeta && !reverse) {
