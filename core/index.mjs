@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 11:27:45
+ * Last modified  : 2024-08-13 14:32:47
  */
 
 import inquirer from 'inquirer';
@@ -32,6 +32,7 @@ import {
   createReverseScript,
   ReleaseMap,
   TaskConfigMap,
+  replaceString,
 } from './tool.mjs';
 import path from 'path';
 import semver from 'semver';
@@ -40,6 +41,7 @@ class Publisher {
   constructor() {
     this.currentVersion = '';
     this.nextVersion = '';
+    this.packageName = '';
 
     /**
      * 用户在命令行执行的结果配置
@@ -84,10 +86,12 @@ class Publisher {
       // 格式：{ XYLink: 'https://fe-private-npm.xylink.com/' }
       // 镜像管理器，支持扩展镜像地址，会合并默认的NPM镜像地址
       mirrorMap: MirrorMap,
+      // Tag名称，其中"%s"会在构建时自动填充版本信息，"%n"自动填充package.json的名称
+      tagName: '%n@%s',
       // 项目名称，构建资源包时提醒
       projectName: 'Default Project',
-      // 版本生成后，会创建对应的git commit和tab commit信息，其中"%s"是自动填充版本信息
-      commitMessage: 'feat: publish release version v%s [#000000]',
+      // 版本生成后，会创建对应的git commit和tab commit信息，其中"%s"会在构建时自动填充版本信息，"%n"自动填充package.json的名称
+      commitMessage: 'feat: publish release version @n@%s [#000000]',
     };
   }
 
@@ -169,7 +173,9 @@ class Publisher {
     this.buildConfig = { ...this.buildConfig, ...configFileContent };
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
     const packagePath = this.getPackageJsonPath();
-    this.currentVersion = readePackageJson(packagePath).version;
+    const { version, name } = readePackageJson(packagePath);
+    this.currentVersion = version;
+    this.packageName = name;
   }
 
   /**
@@ -286,17 +292,12 @@ class Publisher {
     }
 
     Logger.log('开始更新Npm Version...');
-    const { release } = this.userSelectConfig;
+    const { release, npmTag } = this.userSelectConfig;
     const isNpmVersion = !!ReleaseMap[release];
+    const nextVersion = isNpmVersion ? semver.inc(this.currentVersion, release, npmTag) : release;
 
     try {
-      // 手动输入版本
-      if (!isNpmVersion) {
-        await this.createManualVersion();
-      } else {
-        // Npm Version更新版本
-        await this.createAutoNpmVersion();
-      }
+      await this.createManualVersion(nextVersion);
     } catch (error) {
       Logger.error('Npm 版本生成失败，请检查', error);
 
@@ -304,57 +305,32 @@ class Publisher {
     }
   }
 
-  async createManualVersion() {
-    const { commitMessage } = this.buildConfig;
-    const { release } = this.userSelectConfig;
-    const replaceCommitMessage = commitMessage.replace('%s', release);
-    const gitCommitCommand = gitCommit(replaceCommitMessage);
+  async createManualVersion(nextVersion) {
+    const { commitMessage, tagName } = this.buildConfig;
+    const commitMsg = replaceString(commitMessage, this.packageName, nextVersion);
+    const tagMsg = replaceString(tagName, this.packageName, nextVersion);
+    const gitCommitCommand = gitCommit(commitMsg);
+
     // git push
     const branch = await getCurrentBranch();
     const gitPushCommand = gitPush(branch.trim());
     const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
+
     // git tag
-    const gitAddTagCommand = gitTag(replaceCommitMessage, release);
+    const gitAddTagCommand = gitTag(tagMsg, commitMsg);
     const packageJsonPath = this.getPackageJsonPath();
-    updatePackageJsonVersion(packageJsonPath, release);
+    updatePackageJsonVersion(packageJsonPath, nextVersion);
 
     try {
       await execShell(gitCommitPushCommand, true);
-      Logger.green('手动版本变动Git提交成功');
+      Logger.green('版本变动Git提交成功');
     } catch (error) {}
 
     try {
       await execShell(gitAddTagCommand);
       await execShell(gitTagPushCommand);
     } catch (error) {}
-    Logger.green('Git变更SDK Version提交成功: ', release);
-  }
-
-  async createAutoNpmVersion() {
-    const { commitMessage, projectDir } = this.buildConfig;
-    const projectPath = path.resolve(process.cwd(), projectDir);
-
-    const { npmTag, release } = this.userSelectConfig;
-    const nextVersion = semver.inc(this.currentVersion, release, npmTag);
-
-    const replaceCommitMessage = commitMessage.replace('%s', nextVersion);
-    const npmVersion = `npm version ${release} --preid=${npmTag} -m "${replaceCommitMessage}"`;
-
-    await execShell(`cd ${projectPath} && pwd && ${npmVersion}`);
-
-    // git push
-    const branch = await getCurrentBranch();
-    const gitPushCommand = gitPush(branch.trim());
-    const gitCommitCommand = gitCommit(replaceCommitMessage);
-    // git commit
-    const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
-
-    try {
-      await execShell(gitCommitPushCommand, true);
-      await execShell(gitTagPushCommand);
-    } catch (error) {}
-
-    Logger.green('Npm变更Version提交成功: ', nextVersion);
+    Logger.green('Git变更Version提交成功: ', nextVersion);
   }
 
   /**

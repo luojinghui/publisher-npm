@@ -7,7 +7,7 @@ export const gitTagPushCommand = `git push --tags`;
 export const gitAddCommand = 'git add .';
 export const gitPush = (branch) => `git push --set-upstream origin ${branch}`;
 export const gitCommit = (commit) => `git commit -m "${commit}"`;
-export const gitTag = (commit, version) => `git tag -a v${version} -m "${commit}"`;
+export const gitTag = (tagName, tagMsg) => `git tag -a ${tagName} -m "${tagMsg}"`;
 export const gitStatus = 'git status --porcelain';
 export const gitCurrentBranch = 'git rev-parse --abbrev-ref HEAD';
 
@@ -299,6 +299,21 @@ export const updatePackageJsonVersion = (path, version) => {
   fs.writeFileSync(path, JSON.stringify(packageJsonObj, null, 2) + '\n', 'utf8');
 
   return true;
+};
+
+/**
+ * 替换字符串
+ *
+ * @param { string } originString - 原字符串
+ * @param { string } name - 名称
+ * @param { string } version - 版本
+ * @returns { string } - 替换过后的字符串
+ */
+export const replaceString = (originString, name = '', version = '') => {
+  const str = originString.replace('%s', version);
+  const str2 = str.replace('%n', name);
+
+  return str2;
 };
 
 /**
