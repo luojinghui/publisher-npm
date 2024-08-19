@@ -18,13 +18,7 @@ A tool for NPM version management, mirror management, build automation, and auto
 
 ## 功能演示
 
-快速自动构建 Beta 资源：
-
-![build_1](https://github.com/luojinghui/publisher-npm/assets/12367406/ad008627-799f-4c47-9b78-817e87ce8e50)
-
-基于手动选择方式构建资源：
-
-![release_2](https://github.com/luojinghui/publisher-npm/assets/12367406/ca1f6744-ec02-4314-8ccb-64594d0b72da)
+https://github.com/user-attachments/assets/eb94c5b7-aa12-4799-826f-fcdeb0fed0a4
 
 ## 安装
 
