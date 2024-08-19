@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-13 15:29:19
+ * Last modified  : 2024-08-19 11:33:38
  */
 
 import inquirer from 'inquirer';
@@ -74,13 +74,13 @@ class Publisher {
      * 用户BuildConfig配置文件内容
      */
     this.buildConfig = {
-      // 构建Script脚本命令
+      // 构建包命令
       buildScript: '',
       // 构建包的基础路径，默认是项目根目录，如需推送其他目录资源，请指定
       buildDir: '.',
       // 项目根目录，在Monorepo项目下需要指定子包的目录，默认是当前项目根目录
       projectDir: '.',
-      // 包管理器，默认是pnpm
+      // 项目使用的包管理器，默认是pnpm，支持 pnpm、yarn、npm 等主流包管理器
       packager: 'pnpm',
       // 镜像配置列表，key是镜像名，value是镜像地址，配置后将在命令行发布镜像选择中罗列出来
       // 格式：{ XYLink: 'https://fe-private-npm.xylink.com/' }
