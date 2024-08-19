@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-19 11:33:38
+ * Last modified  : 2024-08-19 15:59:32
  */
 
 import inquirer from 'inquirer';
@@ -47,7 +47,7 @@ class Publisher {
      * 用户在命令行执行的结果配置
      */
     this.userSelectConfig = {
-      npmTag: NPMTagMap.beta,
+      npmTag: NPMTagMap.release,
       release: ReleaseMap.prerelease,
       mirrorType: Object.keys(MirrorMap)[0],
     };
