@@ -18,7 +18,7 @@ A tool for NPM version management, mirror management, build automation, and auto
 
 ## 功能演示
 
-https://github.com/user-attachments/assets/eb94c5b7-aa12-4799-826f-fcdeb0fed0a4
+![record_3](https://github.com/user-attachments/assets/3a286ba7-e14a-472f-952e-5bd65009ecc7)
 
 ## 安装
 
