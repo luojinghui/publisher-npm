@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2024-08-19 15:59:32
+ * Last modified  : 2025-04-21 15:13:39
  */
 
 import inquirer from 'inquirer';
@@ -62,6 +62,7 @@ class Publisher {
       reverse: false,
       task: 'selectVersion-selectMirror-commitTag-build-publish',
       taskConfig: {
+        selectTag: false,
         selectVersion: false,
         selectMirror: false,
         commitTag: false,
@@ -101,7 +102,7 @@ class Publisher {
   async run(options) {
     try {
       Logger.log('正在检测文件变动...');
-      await checkUncommittedChanges();
+      // await checkUncommittedChanges();
 
       await this.parseCommandConfig(options);
 
@@ -239,7 +240,13 @@ class Publisher {
     }
 
     try {
-      const { selectVersion, selectMirror } = this.commandConfig.taskConfig;
+      const { selectVersion, selectMirror, selectTag } = this.commandConfig.taskConfig;
+
+      if (selectTag) {
+        await this.createPublishTag();
+      }
+
+      return;
 
       if (selectVersion) {
         await this.createNpmVersion();
@@ -256,10 +263,13 @@ class Publisher {
     }
   }
 
-  async createNpmVersion() {
+  async createPublishTag() {
     // 获取发布库的TAG类型
     const { npmTag } = await inquirer.prompt(getQuestionNPMTag(this.buildConfig.projectName));
     this.userSelectConfig.npmTag = npmTag;
+  }
+
+  async createNpmVersion() {
     // 通过 NPM 包版本类型
     const { release } = await inquirer.prompt(getQuestionNextVersion(this.currentVersion, npmTag));
     const isInputVersion = release === ReleaseMap.manual;

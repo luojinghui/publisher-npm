@@ -162,6 +162,8 @@ export const getQuestionNPMTag = (projectName) => {
     choices.push(NPMTagMap[key]);
   }
 
+  console.log('======choices: ', choices);
+
   const QuestionTag = [
     {
       type: 'list',
