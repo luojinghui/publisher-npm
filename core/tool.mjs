@@ -46,7 +46,9 @@ export const ReleaseMap = {
 
 export const FilterReleaseMap = ['patch', 'minor', 'major', 'manual'];
 
-export const TaskConfigMap = ['selectVersion', 'selectMirror', 'commitTag', 'build', 'publish'];
+export const TaskConfigMap = ['selectTag', 'selectVersion', 'selectMirror', 'commitTag', 'build', 'publish'];
+
+export const manualInputTagString = 'manual input tag';
 
 /**
  * 获取更新镜像地址配置
@@ -162,7 +164,7 @@ export const getQuestionNPMTag = (projectName) => {
     choices.push(NPMTagMap[key]);
   }
 
-  console.log('======choices: ', choices);
+  choices.push(manualInputTagString);
 
   const QuestionTag = [
     {
@@ -193,6 +195,24 @@ export const QuestionInputVersion = [
       }
 
       return '版本号不符合规则，请重新输入\n';
+    },
+  },
+];
+
+/**
+ * 获取输入NPM TAG方式配置
+ */
+export const QuestionInputTag = [
+  {
+    type: 'input',
+    name: 'userCustomTag',
+    message: `请手动输入NPM Tag`,
+    validate: (val) => {
+      if (typeof val === 'string') {
+        return true;
+      }
+
+      return 'NPM Tag仅支持字符串\n';
     },
   },
 ];

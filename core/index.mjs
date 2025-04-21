@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-04-21 15:13:39
+ * Last modified  : 2025-04-21 15:30:14
  */
 
 import inquirer from 'inquirer';
@@ -33,6 +33,8 @@ import {
   ReleaseMap,
   TaskConfigMap,
   replaceString,
+  manualInputTagString,
+  QuestionInputTag,
 } from './tool.mjs';
 import path from 'path';
 import semver from 'semver';
@@ -60,7 +62,7 @@ class Publisher {
       configIgnore: false,
       quickBeta: false,
       reverse: false,
-      task: 'selectVersion-selectMirror-commitTag-build-publish',
+      task: 'selectTag-selectVersion-selectMirror-commitTag-build-publish',
       taskConfig: {
         selectTag: false,
         selectVersion: false,
@@ -102,7 +104,7 @@ class Publisher {
   async run(options) {
     try {
       Logger.log('正在检测文件变动...');
-      // await checkUncommittedChanges();
+      await checkUncommittedChanges();
 
       await this.parseCommandConfig(options);
 
@@ -246,8 +248,6 @@ class Publisher {
         await this.createPublishTag();
       }
 
-      return;
-
       if (selectVersion) {
         await this.createNpmVersion();
       }
@@ -266,7 +266,14 @@ class Publisher {
   async createPublishTag() {
     // 获取发布库的TAG类型
     const { npmTag } = await inquirer.prompt(getQuestionNPMTag(this.buildConfig.projectName));
-    this.userSelectConfig.npmTag = npmTag;
+
+    if (npmTag !== manualInputTagString) {
+      this.userSelectConfig.npmTag = npmTag;
+    } else {
+      const { userCustomTag } = await inquirer.prompt(QuestionInputTag);
+
+      this.userSelectConfig.npmTag = userCustomTag;
+    }
   }
 
   async createNpmVersion() {
