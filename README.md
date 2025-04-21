@@ -38,7 +38,20 @@ publisher-npm run [--config /path/build.config.json] [--configIgnore] [--quickBe
 - `--configIgnore` 可选参数，是否省略配置，如果项目中仅需支持 NPM 镜像仓库，则无需配置`build.config.json`文件，使用此参数即可
 - `--quickBeta` 可选参数，配置是否快速构建 Beta 版本，默认是不构建，构建时默认使用第一个镜像仓库地址推送 NPM 包
 - `--reverse` 可选参数，是否执行撤销版本操作，如果启用，则需要输入版本号和选择仓库进行撤销版本操作
-- `--task` 可选参数，按需执行 Task 任务，默认是执行所有任务，配置一个字符串，使用"-"连接任务，可配置：selectVersion,selectMirror,commitTag,build,publish，例如：--task selectVersion-build-publish，仅执行选择版本+构建+推送包任务
+- `--task` 可选参数，按需执行 Task 任务，默认是执行所有任务，配置一个字符串，使用"-"连接任务，可配置：selectTag,selectVersion,selectMirror,commitTag,build,publish，例如：--task selectVersion-build-publish，仅执行选择版本+构建+推送包任务
+
+### Task 任务说明
+
+| Task 名称     | 说明                                                                       |
+| ------------- | -------------------------------------------------------------------------- |
+| selectTag     | 选择发布的 NPM Tag，如 latest、beta、alpha、rc、private 等，支持自定义输入 |
+| selectVersion | 选择发布的版本号，如 patch、minor、major 等，支持手动输入版本号            |
+| selectMirror  | 选择发布的镜像仓库地址                                                     |
+| commitTag     | 提交 Git Tag 和版本变更记录                                                |
+| build         | 执行构建命令，生成发布包                                                   |
+| publish       | 发布 NPM 包到选定的镜像仓库                                                |
+
+示例：`--task selectVersion-build-publish` 表示仅执行选择版本、构建和推送包这三个任务，跳过其他任务。
 
 ### 添加配置文件
 
