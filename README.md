@@ -1,6 +1,6 @@
 # NPM Publisher
 
-针对 TS/JS 库、组件库、Monorepo 库等任何需推送镜像仓库的项目进行 NPM 版本管理、镜像管理、构建自动化和 NPM 包的自动推送工具。
+针对 TS/JS 库、组件库、Monorepo 库等任何需推送镜像仓库的项目进行 NPM 版本管理、Tag 管理、镜像管理、构建自动化和 NPM 包的自动推送工具。
 
 ## English Documentation
 
@@ -127,7 +127,7 @@ $ pnpm publish:release --task selectVersion-build-publish
 
 ## License
 
-Copyright (c) 2024. Licensed under the MIT license.
+Copyright (c) 2025. Licensed under the MIT license.
 
 ## Author
 

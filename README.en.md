@@ -1,6 +1,6 @@
 # NPM Publisher
 
-A tool for NPM version management, mirror management, build automation, and automatic NPM package publishing for any project that needs to push to mirror repositories, including TS/JS libraries, component libraries, Monorepo libraries, etc.
+A tool for NPM version management, tag management, mirror management, build automation, and automatic NPM package publishing for any project that needs to push to mirror repositories, including TS/JS libraries, component libraries, Monorepo libraries, etc.
 
 ## Features
 
@@ -123,7 +123,7 @@ $ pnpm publish:release --task selectVersion-build-publish
 
 ## License
 
-Copyright (c) 2024. Licensed under the MIT license.
+Copyright (c) 2025. Licensed under the MIT license.
 
 ## Author
 
