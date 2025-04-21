@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-04-21 15:30:14
+ * Last modified  : 2025-04-21 15:36:15
  */
 
 import inquirer from 'inquirer';
@@ -277,6 +277,7 @@ class Publisher {
   }
 
   async createNpmVersion() {
+    const npmTag = this.userSelectConfig.npmTag;
     // 通过 NPM 包版本类型
     const { release } = await inquirer.prompt(getQuestionNextVersion(this.currentVersion, npmTag));
     const isInputVersion = release === ReleaseMap.manual;
