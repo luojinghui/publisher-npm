@@ -1,8 +1,10 @@
 # NPM Publisher
 
-A tool for NPM version management, mirror management, build automation, and automatic push of NPM packages for any project that needs to push a repository, such as TS/JS libraries, component libraries, Monorepo libraries, etc.
-
 针对 TS/JS 库、组件库、Monorepo 库等任何需推送镜像仓库的项目进行 NPM 版本管理、镜像管理、构建自动化和 NPM 包的自动推送工具。
+
+## English Documentation
+
+For English documentation, please see [README.en.md](./README.en.md).
 
 ## 功能
 
