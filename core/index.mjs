@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-04-21 15:36:15
+ * Last modified  : 2025-05-22 12:14:36
  */
 
 import inquirer from 'inquirer';
@@ -103,6 +103,7 @@ class Publisher {
    */
   async run(options) {
     try {
+      Logger.cyan('欢迎使用「publisher-npm」工具，如有问题请提交issue：https://github.com/luojinghui/publisher-npm');
       Logger.log('正在检测文件变动...');
       await checkUncommittedChanges();
 
