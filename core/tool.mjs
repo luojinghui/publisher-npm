@@ -238,6 +238,7 @@ export const getQuestionNextVersion = (currentVersion, npmTag) => {
     preminor: `preminor->${preminor}`,
     major: `major->${major}`,
     premajor: `premajor->${premajor}`,
+    current: `${ReleaseMap.manual}->${currentVersion}`,
     manual: ReleaseMap.manual,
   };
   const currentVerMsg = chalk.green(`当前版本: ${currentVersion}`);
