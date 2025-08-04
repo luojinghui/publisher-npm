@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-08-04 18:58:02
+ * Last modified  : 2025-08-04 19:05:46
  */
 
 import inquirer from 'inquirer';
@@ -339,6 +339,7 @@ class Publisher {
     const branch = await getCurrentBranch();
     const gitPushCommand = gitPush(branch.trim());
     const gitCommitPushCommand = `${gitAddCommand} && ${gitCommitCommand} && ${gitPushCommand}`;
+    const gitAddCommitCommand = `${gitAddCommand} && ${gitCommitCommand}`;
 
     // git tag
     const gitAddTagCommand = gitTag(tagMsg, commitMsg);
@@ -351,7 +352,11 @@ class Publisher {
         Logger.green('版本变动Git提交成功');
       } catch (error) {}
     } else {
-      Logger.green('忽略Git提交变动');
+      try {
+        await execShell(gitAddCommitCommand, true);
+        Logger.warn('版本变动生成Message成功，未提交，请及时提交');
+      } catch (error) {}
+      Logger.log('忽略Git提交变动');
     }
 
     try {
