@@ -45,7 +45,7 @@ export const ReleaseMap = {
   manual: 'manual input version',
 };
 
-export const FilterReleaseMap = ['patch', 'minor', 'major', 'manual'];
+export const FilterReleaseMap = ['patch', 'minor', 'major', 'current', 'manual'];
 
 export const TaskConfigMap = ['selectTag', 'selectVersion', 'selectMirror', 'commitTag', 'build', 'publish'];
 
