@@ -9,7 +9,7 @@ For English documentation, please see [README.en.md](./README.en.md).
 ## 功能
 
 1. 支持基于 Npm Version 标准版本管控和手动指定版本管理
-2. 支持配置 Tag 格式和 Commit 内容格式，支持自动提交 Tag 和提交版本 Log
+2. 支持配置 Tag 格式和 Commit 内容格式，支持自动提交 Tag 和提交版本 Log，支持配置命令参数 --notPush 忽略推送 Git 记录
 3. 支持配置推送包目录和项目根目录，可在任何独立项目或者 Monorepo 项目下使用
 4. 支持快速构建 Beta 版本
 5. 支持 Task 节点热插拔，可按需执行任务，例如忽略构建、忽略版本选择、忽略推送、忽略提交 Tag 等
@@ -40,6 +40,7 @@ publisher-npm run [--config /path/build.config.json] [--configIgnore] [--quickBe
 - `--configIgnore` 可选参数，是否省略配置，如果项目中仅需支持 NPM 镜像仓库，则无需配置`build.config.json`文件，使用此参数即可
 - `--quickBeta` 可选参数，配置是否快速构建 Beta 版本，默认是不构建，构建时默认使用第一个镜像仓库地址推送 NPM 包
 - `--reverse` 可选参数，是否执行撤销版本操作，如果启用，则需要输入版本号和选择仓库进行撤销版本操作
+- `--notPush` 可选参数，是否执行推送 Git 变更记录，默认执行，传递此参数后，工具仅生成 Commit Message，不执行 Git Push 操作
 - `--task` 可选参数，按需执行 Task 任务，默认是执行所有任务，配置一个字符串，使用"-"连接任务，可配置：selectTag,selectVersion,selectMirror,commitTag,build,publish，例如：--task selectVersion-build-publish，仅执行选择版本+构建+推送包任务
 
 ### Task 任务说明
