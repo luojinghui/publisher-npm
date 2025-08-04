@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-08-04 19:06:55
+ * Last modified  : 2025-08-04 19:08:26
  */
 
 import inquirer from 'inquirer';
@@ -354,7 +354,7 @@ class Publisher {
     } else {
       try {
         await execShell(gitAddCommitCommand, false);
-        Logger.warn('版本变动生成Message成功，未提交，请及时提交');
+        Logger.warn('版本变动生成Message成功，未提交Git变动，请及时提交');
       } catch (error) {}
       Logger.log('忽略Git提交变动');
     }
