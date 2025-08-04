@@ -41,6 +41,7 @@ export const ReleaseMap = {
   preminor: 'preminor',
   major: 'major',
   premajor: 'premajor',
+  current: 'keep current version (no change)',
   manual: 'manual input version',
 };
 
