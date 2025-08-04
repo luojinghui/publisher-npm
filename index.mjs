@@ -11,6 +11,7 @@ program
   .option('--configIgnore', '[use default config file, not create build.config.json file in project]')
   .option('--quickBeta', '[publish beta version quickly]')
   .option('--reverse', '[unpublish version]')
+  .option('--notPush', '[not push tag change to git]')
   .option(
     '--task <task>',
     '[custom tasks, type is string, support: selectVersion,selectMirror,commitTag,build,publish, example: --task "selectVersion-build"]'

@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-08-04 18:45:53
+ * Last modified  : 2025-08-04 18:52:34
  */
 
 import inquirer from 'inquirer';
@@ -61,6 +61,7 @@ class Publisher {
       config: 'build.config.json',
       configIgnore: false,
       quickBeta: false,
+      notPush: false,
       reverse: false,
       task: 'selectTag-selectVersion-selectMirror-commitTag-build-publish',
       taskConfig: {
@@ -328,6 +329,7 @@ class Publisher {
   }
 
   async createManualVersion(nextVersion) {
+    const { notPush } = this.commandConfig;
     const { commitMessage, tagName } = this.buildConfig;
     const commitMsg = replaceString(commitMessage, this.packageName, nextVersion);
     const tagMsg = replaceString(tagName, this.packageName, nextVersion);
@@ -343,10 +345,14 @@ class Publisher {
     const packageJsonPath = this.getPackageJsonPath();
     updatePackageJsonVersion(packageJsonPath, nextVersion);
 
-    try {
-      await execShell(gitCommitPushCommand, true);
-      Logger.green('版本变动Git提交成功');
-    } catch (error) {}
+    if (!notPush) {
+      try {
+        await execShell(gitCommitPushCommand, true);
+        Logger.green('版本变动Git提交成功');
+      } catch (error) {}
+    } else {
+      Logger.green('忽略Git提交变动');
+    }
 
     try {
       await execShell(`${gitAddTagCommand} && ${gitTagPushCommand}`);
