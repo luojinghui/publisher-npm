@@ -4,7 +4,7 @@
  * @authors Luo-jinghui (luojinghui424@gmail.com)
  *
  * Created at     : 2022-08-12 19:11:52
- * Last modified  : 2025-05-22 12:14:36
+ * Last modified  : 2025-08-04 17:51:59
  */
 
 import inquirer from 'inquirer';
@@ -341,7 +341,7 @@ class Publisher {
     updatePackageJsonVersion(packageJsonPath, nextVersion);
 
     try {
-      await execShell(gitCommitPushCommand, true);
+      // await execShell(gitCommitPushCommand, true);
       Logger.green('版本变动Git提交成功');
     } catch (error) {}
 
