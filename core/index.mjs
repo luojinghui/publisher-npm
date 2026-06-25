@@ -26,6 +26,11 @@ import {
   gitTag,
   gitTagPushCommand,
   MirrorMap,
+  ALL_MIRRORS_KEY,
+  isAllMirrors,
+  getMirrorTypeList,
+  getAvailableMirrorTypeHint,
+  validateMirrorMapNoAllKey,
   getQuickConfigMap,
   getPublishCommend,
   parseNpmPublishError,
@@ -186,6 +191,7 @@ class Publisher {
 
     this.buildConfig = { ...this.buildConfig, ...configFileContent };
     this.buildConfig.mirrorMap = { ...this.buildConfig.mirrorMap, ...MirrorMap };
+    validateMirrorMapNoAllKey(this.buildConfig.mirrorMap);
     const packagePath = this.getPackageJsonPath();
     const { version, name } = readePackageJson(packagePath);
     this.currentVersion = version;
@@ -210,13 +216,15 @@ class Publisher {
     }
 
     if (mirrorType) {
-      if (!mirrorMap[mirrorType]) {
-        const available = Object.keys(mirrorMap).join(', ');
+      if (isAllMirrors(mirrorType)) {
+        this.userSelectConfig.mirrorType = ALL_MIRRORS_KEY;
+      } else if (!mirrorMap[mirrorType]) {
+        const available = getAvailableMirrorTypeHint(mirrorMap);
         Logger.error(`镜像 "${mirrorType}" 不存在，可选: ${available}`);
         throw new Error('Invalid mirrorType');
+      } else {
+        this.userSelectConfig.mirrorType = mirrorType;
       }
-
-      this.userSelectConfig.mirrorType = mirrorType;
     }
   }
 
@@ -262,10 +270,13 @@ class Publisher {
     let mirrorType = cliMirrorType;
 
     if (!mirrorType) {
-      const answer = await inquirer.prompt(getQuestionMirrorType(mirrorMap));
+      const answer = await inquirer.prompt(getQuestionMirrorType(mirrorMap, { includeAll: false }));
       mirrorType = answer.mirrorType;
+    } else if (isAllMirrors(mirrorType)) {
+      Logger.error('撤销版本不支持 all，请指定具体镜像');
+      return Promise.reject('Invalid mirrorType for reverse');
     } else if (!mirrorMap[mirrorType]) {
-      const available = Object.keys(mirrorMap).join(', ');
+      const available = getMirrorTypeList(mirrorMap).join(', ');
       Logger.error(`镜像 "${mirrorType}" 不存在，可选: ${available}`);
       return Promise.reject('Invalid mirrorType');
     }
@@ -523,17 +534,25 @@ class Publisher {
     Logger.log(`开始推送${projectName} Npm包...`);
     Logger.log('build package directory: ', packageDir);
 
-    const result = await this.publishToMirror({
-      name,
-      version,
-      npmTag,
-      mirrorType,
-      mirrorMap,
-      packager,
-      buildDir,
-    });
+    const mirrorTypes = isAllMirrors(mirrorType) ? getMirrorTypeList(mirrorMap) : [mirrorType];
 
-    Logger.green(`已推送包到${mirrorType}仓库：`, result.package);
+    for (const type of mirrorTypes) {
+      const result = await this.publishToMirror({
+        name,
+        version,
+        npmTag,
+        mirrorType: type,
+        mirrorMap,
+        packager,
+        buildDir,
+      });
+
+      Logger.green(`已推送包到${type}仓库：`, result.package);
+    }
+
+    if (isAllMirrors(mirrorType)) {
+      Logger.green(`全部镜像发布完成（${mirrorTypes.length} 个）`);
+    }
   }
 }
 

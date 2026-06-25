@@ -11,7 +11,7 @@ A tool for NPM version management, tag management, mirror management, build auto
 3. Configurable publish directory and project root; works in standalone projects and Monorepo subpackages
 4. Quick beta builds (`--quickBeta`)
 5. Hot-pluggable task pipeline—skip build, version selection, publish, etc. as needed
-6. Multiple mirror registries via `mirrorMap`
+6. Multiple mirror registries via `mirrorMap`; publish to one registry or `all` for every mirror
 7. Auto-build after version bump, then publish to selected registry
 8. Supports pnpm, yarn, npm, and other package managers
 9. Unpublish (rollback) published versions
@@ -42,7 +42,7 @@ node index.mjs run [options]
 | `--reverse` | Unpublish a specific version |
 | `--notPush` | Commit version changes locally without git push |
 | `--task <tasks>` | Task chain joined by `-`; see table below |
-| `--mirrorType <name>` | Skip mirror prompt, e.g. `XYLink`, `NPM` |
+| `--mirrorType <name>` | Skip mirror prompt, e.g. `XYLink`, `NPM`, or `all` (all mirrors) |
 | `--npmTag <tag>` | Skip tag prompt, e.g. `latest`, `beta` |
 | `--release <type>` | Skip version prompt, e.g. `patch`, `minor`, `1.4.1`, `current` |
 | `-v, --version` | Print CLI version |
@@ -55,10 +55,10 @@ Default: `selectTag-selectVersion-selectMirror-commitTag-build-publish`
 | --- | --- | --- |
 | `selectTag` | Choose npm dist-tag (latest/beta/…) | `--npmTag` |
 | `selectVersion` | Choose semver strategy or manual version | `--release` |
-| `selectMirror` | Choose registry mirror | `--mirrorType` |
+| `selectMirror` | Choose registry mirror (`all` is last in the list) | `--mirrorType` |
 | `commitTag` | Bump version + git commit/tag/push | — |
 | `build` | Run `{packager} {buildScript}` | — |
-| `publish` | Publish to selected registry | Requires mirrorType/npmTag |
+| `publish` | Publish to selected or all registries | Requires mirrorType/npmTag |
 
 Examples:
 
@@ -72,7 +72,18 @@ publisher-npm run \
   --npmTag latest \
   --release patch \
   --mirrorType XYLink
+
+# Non-interactive, publish to all mirrors
+publisher-npm run \
+  --config ./build.config.json \
+  --npmTag latest \
+  --release patch \
+  --mirrorType all
 ```
+
+### Mirror selection
+
+Interactive list order: mirrors from `mirrorMap` (user config first) → built-in `NPM` → `all` (all mirrors). `all` is not a mirrorMap key and cannot be used as one. `--reverse` does not support `all`.
 
 ### Configuration: build.config.json
 

@@ -44,7 +44,7 @@ node index.mjs run [options]
 | `--reverse` | flag | false | 撤销（unpublish）指定版本 |
 | `--notPush` | flag | false | 版本变更仅本地 commit，不 git push |
 | `--task <tasks>` | string | 见下表 | 用 `-` 连接要执行的任务节点 |
-| `--mirrorType <name>` | string | — | 跳过镜像选择；必须是 mirrorMap 中的 key |
+| `--mirrorType <name>` | string | — | 跳过镜像选择；mirrorMap 中的 key，或 `all`（全部镜像） |
 | `--npmTag <tag>` | string | — | 跳过 Tag 选择，如 `latest`、`beta` |
 | `--release <value>` | string | — | 跳过版本选择；见 Release 取值表 |
 | `-v, --version` | flag | — | 打印 CLI 版本 |
@@ -64,7 +64,7 @@ selectTag-selectVersion-selectMirror-commitTag-build-publish
 | `selectMirror` | 选择镜像 key | `--mirrorType` | 设置 `userSelectConfig.mirrorType` |
 | `commitTag` | 无 | — | 更新 package.json version + git commit/tag/push |
 | `build` | 无 | — | 执行 `{packager} {buildScript}` |
-| `publish` | 无 | 需已设定 mirrorType/npmTag | 向单个镜像 publish |
+| `publish` | 无 | 需已设定 mirrorType/npmTag | 向单个或全部镜像 publish（`mirrorType=all`） |
 
 **Task 组合规则：**
 
@@ -104,6 +104,8 @@ selectTag-selectVersion-selectMirror-commitTag-build-publish
 { "NPM": "https://registry.npmjs.org/" }
 ```
 
+**`all` 虚拟选项：** `mirrorType=all` 时按 `Object.keys(mirrorMap)` 顺序依次 publish（用户配置镜像在前，内置 NPM 在后）。`all` 不可作为 mirrorMap 的 key。交互选择列表中 `all` 位于最后一项。`--reverse` 不支持 `all`。
+
 ## 非交互发布示例（供 Agent 直接调用）
 
 ```bash
@@ -113,6 +115,13 @@ publisher-npm run \
   --npmTag latest \
   --release patch \
   --mirrorType XYLink
+
+# 发布到全部镜像
+publisher-npm run \
+  --config ./build.config.json \
+  --npmTag latest \
+  --release patch \
+  --mirrorType all
 
 # 仅重试 publish（版本已在 package.json / git 中）
 publisher-npm run \
@@ -166,7 +175,7 @@ publisher-npm run --config ./build.config.json --reverse --mirrorType NPM
 | commitTag | git add/commit/push/tag 任一失败 |
 | build | buildScript 命令非零退出 |
 | reverse | unpublish 命令非零退出 |
-| 配置 | `--mirrorType` 不在 mirrorMap 中 |
+| 配置 | `--mirrorType` 不在 mirrorMap 中且不是 `all`；或 mirrorMap 含 key `all` |
 
 ## 部分成功状态（重要）
 
@@ -187,18 +196,20 @@ Agent 恢复策略（按优先级）：
 | 符号 | 文件 | 说明 |
 | --- | --- | --- |
 | `publisher.run()` | `core/index.mjs` | 主编排 |
-| `publishToMirror()` | `core/index.mjs` | 单镜像 publish（多镜像扩展点） |
+| `publishToMirror()` | `core/index.mjs` | 单镜像 publish |
+| `ALL_MIRRORS_KEY` | `core/tool.mjs` | 虚拟选项 `all`，发布全部镜像 |
+| `isAllMirrors()` | `core/tool.mjs` | 判断是否为全部镜像发布 |
 | `execShell()` | `core/tool.mjs` | Shell 执行 |
 | `parseNpmPublishError()` | `core/tool.mjs` | npm 错误解析 |
 | `printPublishFailure()` | `core/tool.mjs` | 失败诊断输出 |
 | `getPublishCommend()` | `core/tool.mjs` | 生成 publish 命令字符串 |
 | `TaskConfigMap` | `core/tool.mjs` | 合法 task 名称列表 |
 
-## 多镜像（尚未实现）
+## 多镜像发布
 
-当前版本 **每次仅推送一个镜像**（`userSelectConfig.mirrorType`）。
+`mirrorType=all` 时循环调用 `publishToMirror()`，按 mirrorMap key 顺序依次推送；版本 bump / git / build 仍只做一次。任一镜像失败即 fail-fast 中断。
 
-后续扩展方向：循环调用 `publishToMirror()`，聚合 `{ mirrorType, success, error }[]` 报告；版本 bump / git 仍只做一次。
+部分镜像已成功、后续镜像失败时：对失败镜像单独 `--task publish --mirrorType <key> --npmTag <tag>` 重试。
 
 ## 前置条件（Agent 执行前检查）
 

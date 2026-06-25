@@ -30,6 +30,29 @@ export const MirrorMap = {
   NPM: 'https://registry.npmjs.org/',
 };
 
+/** 发布到全部镜像时的虚拟选项 key（不在 mirrorMap 中） */
+export const ALL_MIRRORS_KEY = 'all';
+
+export function isAllMirrors(mirrorType) {
+  return mirrorType === ALL_MIRRORS_KEY;
+}
+
+export function getMirrorTypeList(mirrorMap) {
+  return Object.keys(mirrorMap);
+}
+
+export function getAvailableMirrorTypeHint(mirrorMap) {
+  return [...getMirrorTypeList(mirrorMap), ALL_MIRRORS_KEY].join(', ');
+}
+
+export function validateMirrorMapNoAllKey(mirrorMap) {
+  if (mirrorMap[ALL_MIRRORS_KEY]) {
+    throw new Error(
+      `mirrorMap 中不能使用 key "${ALL_MIRRORS_KEY}"，该名称用于发布全部镜像，请修改 build.config.json`,
+    );
+  }
+}
+
 /**
  * NPM 版本变动类型
  */
@@ -370,18 +393,21 @@ export const getQuestionNextVersion = (currentVersion, npmTag) => {
 /**
  * 获取使用镜像方式配置
  */
-export const getQuestionMirrorType = (mirrorMap) => {
-  const choices = [];
+export const getQuestionMirrorType = (mirrorMap, { includeAll = true } = {}) => {
+  const mirrorKeys = getMirrorTypeList(mirrorMap);
   let message = '请选择镜像：';
 
-  for (let key in mirrorMap) {
-    choices.push(key);
+  for (const key of mirrorKeys) {
     message += `\n${key}: ${mirrorMap[key]}`;
   }
 
-  const QuestionMirrorType = [{ type: 'list', name: 'mirrorType', message, choices: choices }];
+  if (includeAll) {
+    message += `\n${ALL_MIRRORS_KEY}: 发布到全部镜像`;
+  }
 
-  return QuestionMirrorType;
+  const choices = includeAll ? [...mirrorKeys, ALL_MIRRORS_KEY] : mirrorKeys;
+
+  return [{ type: 'list', name: 'mirrorType', message, choices }];
 };
 
 /**

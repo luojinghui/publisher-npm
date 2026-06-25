@@ -15,7 +15,7 @@ For English documentation, see [README.en.md](./README.en.md).
 3. 可配置推送目录与项目根目录，适用于独立项目与 Monorepo 子包
 4. 快速 Beta 构建（`--quickBeta`）
 5. Task 节点热插拔，按需跳过构建、版本选择、推送等步骤
-6. 多镜像配置（`mirrorMap`），发布时选择目标 registry
+6. 多镜像配置（`mirrorMap`），发布时选择目标 registry，或 `all` 发布到全部镜像
 7. 版本更新后自动构建并推送
 8. 支持 pnpm、yarn、npm 等包管理器
 9. 支持撤销（unpublish）已发布版本
@@ -46,7 +46,7 @@ node index.mjs run [options]
 | `--reverse` | 撤销指定版本（unpublish） |
 | `--notPush` | 版本变更仅本地 commit，不 push 到 remote |
 | `--task <tasks>` | 任务链，用 `-` 连接，见下表 |
-| `--mirrorType <name>` | 跳过镜像选择，如 `XYLink`、`NPM` |
+| `--mirrorType <name>` | 跳过镜像选择，如 `XYLink`、`NPM`、`all`（全部镜像） |
 | `--npmTag <tag>` | 跳过 Tag 选择，如 `latest`、`beta` |
 | `--release <type>` | 跳过版本选择，如 `patch`、`minor`、`1.4.1`、`current` |
 | `-v, --version` | 打印 CLI 版本 |
@@ -59,10 +59,10 @@ node index.mjs run [options]
 | --- | --- | --- |
 | `selectTag` | 选择 npm dist-tag（latest/beta/…） | `--npmTag` |
 | `selectVersion` | 选择版本策略或手动版本 | `--release` |
-| `selectMirror` | 选择镜像 registry | `--mirrorType` |
+| `selectMirror` | 选择镜像 registry（列表末项为 `all`） | `--mirrorType` |
 | `commitTag` | 更新 version + git commit/tag/push | — |
 | `build` | 执行 `{packager} {buildScript}` | — |
-| `publish` | 推送到选定镜像 | 需配合 mirrorType/npmTag |
+| `publish` | 推送到选定镜像或全部镜像 | 需配合 mirrorType/npmTag |
 
 示例：
 
@@ -76,7 +76,18 @@ publisher-npm run \
   --npmTag latest \
   --release patch \
   --mirrorType XYLink
+
+# 非交互，发布到全部镜像
+publisher-npm run \
+  --config ./build.config.json \
+  --npmTag latest \
+  --release patch \
+  --mirrorType all
 ```
+
+### 镜像选择说明
+
+交互列表顺序：用户 `mirrorMap` 配置的镜像 → 内置 `NPM` → `all`（全部镜像）。`all` 不在 mirrorMap 中，不可作为 mirrorMap 的 key。`--reverse` 不支持 `all`。
 
 ### 配置文件 build.config.json
 

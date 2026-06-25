@@ -12,7 +12,7 @@ program
   .option('--quickBeta', '[publish beta version quickly]')
   .option('--reverse', '[unpublish version]')
   .option('--notPush', '[not push tag change to git]')
-  .option('--mirrorType <name>', '[skip mirror prompt, e.g. XYLink or NPM]')
+  .option('--mirrorType <name>', '[skip mirror prompt, e.g. XYLink, NPM, or all]')
   .option('--npmTag <tag>', '[skip tag prompt, e.g. latest or beta]')
   .option('--release <type>', '[skip version prompt, e.g. patch, minor, 1.4.1, or current]')
   .option(
