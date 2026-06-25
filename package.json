@@ -1,6 +1,6 @@
 {
   "name": "publisher-npm",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "JavaScript library version management, build automation, and publishing tool for npm packages. See AGENTS.md for AI/CI integration reference.",
   "main": "index.mjs",
   "scripts": {
