@@ -490,14 +490,14 @@ class Publisher {
         npmTag,
       });
 
-      printPublishFailure(parsed, {
-        mirrorType,
-        configPath: this.commandConfig.config,
-        npmTag,
-      });
+      printPublishFailure(parsed, { mirrorType });
 
       if (this.versionCommitted) {
-        printPartialPublishFailure(version);
+        printPartialPublishFailure(version, {
+          configPath: this.commandConfig.config,
+          mirrorType,
+          npmTag,
+        });
       }
 
       return Promise.reject(`publish failed: ${parsed.code}`);

@@ -139,7 +139,7 @@ export function execShell(command, outputLog = false) {
             exitCode: error.code ?? 1,
             stdout: out,
             stderr: err,
-          })
+          }),
         );
         return;
       }
@@ -209,7 +209,7 @@ export function parseNpmPublishError({
 /**
  * 打印发布失败诊断信息与重试方式
  */
-export function printPublishFailure(parsed, { mirrorType, configPath = './config/build.config.json', npmTag } = {}) {
+export function printPublishFailure(parsed, { mirrorType } = {}) {
   Logger.error('发布失败', `${parsed.package} → ${mirrorType} (${parsed.registry})`);
   Logger.error('原因', `${parsed.reason}（${parsed.code}）`);
   Logger.warn('修复建议：');
@@ -218,22 +218,29 @@ export function printPublishFailure(parsed, { mirrorType, configPath = './config
     Logger.log(`  ${index + 1}. ${fix}`);
   });
 
-  Logger.warn('重新尝试（仅推送，不升版本）：');
+  Logger.warn('修复后可手动重试：');
   Logger.log(`  ${parsed.retryCommand}`);
-  Logger.warn('或使用工具仅重试 publish 步骤：');
-  Logger.log(
-    `  node index.mjs run --config ${configPath} --task publish --mirrorType ${mirrorType} --npmTag ${npmTag || 'latest'}`
-  );
+}
+
+/**
+ * 生成「仅发布镜像包」的 task 重试命令（版本已提交、publish 失败场景）
+ */
+export function getPublishRetryTaskCommand({ configPath, mirrorType, npmTag }) {
+  return `--task publish --mirrorType ${mirrorType} --npmTag ${npmTag}`;
 }
 
 /**
  * 版本已提交但发布失败时的善后提示
  */
-export function printPartialPublishFailure(version) {
+export function printPartialPublishFailure(version, { configPath, mirrorType, npmTag } = {}) {
   Logger.warn(`版本 ${version} 已写入 package.json 并提交 Git，但 npm 发布未成功。`);
   Logger.log('可选操作：');
-  Logger.log('  - 修复权限/镜像问题后，使用 --task publish 仅重试推送（版本不变）');
-  Logger.log('  - 或 git revert 撤销版本提交后重新走完整发布流程');
+
+  if (configPath && mirrorType && npmTag) {
+    const retryTaskCommand = getPublishRetryTaskCommand({ configPath, mirrorType, npmTag });
+    Logger.warn('修复问题后，可在推送命令中添加以下参数仅发布镜像包（不升版本、不构建）：');
+    Logger.log(`  ${retryTaskCommand}`);
+  }
 }
 
 /**
