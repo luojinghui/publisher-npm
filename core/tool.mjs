@@ -159,7 +159,11 @@ const NPM_PUBLISH_ERROR_MAP = {
   },
   E403: {
     reason: '当前账号没有发布权限（可能被 org 策略或 2FA 限制）',
-    fixes: ['确认账号对该包有 publish 权限', '若启用 2FA，请使用 granular access token 并勾选 bypass 2FA'],
+    fixes: [
+      '确认账号对该包有 publish 权限',
+      '若启用 2FA，请创建 granular access token 并勾选 bypass 2FA',
+      '配置Token：npm config set //registry.npmjs.org/:_authToken=你的token',
+    ],
   },
   E401: {
     reason: '未通过 registry 认证',
