@@ -16,8 +16,8 @@ export const gitCurrentBranch = 'git rev-parse --abbrev-ref HEAD';
  */
 export const NPMTagMap = {
   beta: 'beta',
-  private: 'private',
   release: 'latest',
+  private: 'private',
   rc: 'rc',
   alpha: 'alpha',
 };
@@ -47,9 +47,7 @@ export function getAvailableMirrorTypeHint(mirrorMap) {
 
 export function validateMirrorMapNoAllKey(mirrorMap) {
   if (mirrorMap[ALL_MIRRORS_KEY]) {
-    throw new Error(
-      `mirrorMap 中不能使用 key "${ALL_MIRRORS_KEY}"，该名称用于发布全部镜像，请修改 build.config.json`,
-    );
+    throw new Error(`mirrorMap 中不能使用 key "${ALL_MIRRORS_KEY}"，该名称用于发布全部镜像，请修改 build.config.json`);
   }
 }
 
