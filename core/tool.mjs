@@ -80,13 +80,27 @@ export const getPublishCommend = (packager, npmTag, mirror) => {
 };
 
 /**
+ * Shell 命令执行失败时抛出的错误
+ */
+export class ExecShellError extends Error {
+  constructor(message, { command, exitCode, stdout = '', stderr = '' } = {}) {
+    super(message);
+    this.name = 'ExecShellError';
+    this.command = command;
+    this.exitCode = exitCode;
+    this.stdout = stdout;
+    this.stderr = stderr;
+  }
+}
+
+/**
  * 检测当前项目git是否存在变动
  */
 export async function checkUncommittedChanges() {
   try {
-    const res = await execShell(gitStatus);
+    const { stdout } = await execShell(gitStatus);
 
-    if (res.length === 0) {
+    if (stdout.trim().length === 0) {
       return true;
     }
 
@@ -98,27 +112,128 @@ export async function checkUncommittedChanges() {
 }
 
 /**
- * 执行Shell脚本
+ * 执行Shell脚本，仅以 exitCode 判定成败（stderr 中的 warn/notice 不算失败）
+ *
+ * @returns { Promise<{ stdout: string, stderr: string, exitCode: number }> }
  */
 export function execShell(command, outputLog = false) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
+      const out = stdout ?? '';
+      const err = stderr ?? '';
+
       if (outputLog) {
-        console.log('output: ', stdout);
-        console.log('stderr: ', stderr);
+        if (out) {
+          console.log('output: ', out);
+        }
+
+        if (err) {
+          console.log('stderr: ', err);
+        }
       }
 
       if (error) {
-        reject(`run commend error: ${error.message}`);
+        reject(
+          new ExecShellError(error.message, {
+            command,
+            exitCode: error.code ?? 1,
+            stdout: out,
+            stderr: err,
+          })
+        );
+        return;
       }
 
-      if (stderr) {
-        reject(`run commend err: ${stderr}`);
-      }
-
-      resolve(stdout);
+      resolve({ stdout: out, stderr: err, exitCode: 0 });
     });
   });
+}
+
+const NPM_PUBLISH_ERROR_MAP = {
+  E404: {
+    reason: '当前账号无权向 registry 发布该包，或包名在 registry 上不存在',
+    fixes: [
+      '执行 npm whoami 或 pnpm whoami 确认已登录且账号正确',
+      '若包名已被他人占用，改用 scoped 包名（如 @your-org/name）或仅发布到私有镜像',
+      '首次发布 scoped 包需加 --access public',
+    ],
+  },
+  E403: {
+    reason: '当前账号没有发布权限（可能被 org 策略或 2FA 限制）',
+    fixes: ['确认账号对该包有 publish 权限', '若启用 2FA，请使用 granular access token 并勾选 bypass 2FA'],
+  },
+  E401: {
+    reason: '未通过 registry 认证',
+    fixes: ['执行 npm login 或配置 ~/.npmrc 中的 auth token', '确认 token 未过期且 registry 地址正确'],
+  },
+  E409: {
+    reason: '该版本已存在于 registry，无法重复发布',
+    fixes: ['升级版本号后重新发布', '或先在 registry 撤销该版本（unpublish，需谨慎）'],
+  },
+  UNKNOWN: {
+    reason: 'npm 发布失败，请查看上方错误日志',
+    fixes: ['检查 registry 地址与网络连接', '查看完整日志: ~/.npm/_logs/'],
+  },
+};
+
+/**
+ * 解析 npm publish 失败输出，生成原因、修复建议与重试命令
+ */
+export function parseNpmPublishError({
+  stdout = '',
+  stderr = '',
+  packageName = '',
+  version = '',
+  registry = '',
+  packager = 'pnpm',
+  npmTag = 'latest',
+} = {}) {
+  const output = `${stdout}\n${stderr}`;
+  const codeMatch = output.match(/npm error code (\w+)/i);
+  const code = codeMatch?.[1]?.toUpperCase() ?? 'UNKNOWN';
+  const registryFromOutput = output.match(/Publishing to (https?:\/\/[^\s]+)/i)?.[1] ?? registry;
+  const pkg = packageName && version ? `${packageName}@${version}` : packageName;
+  const template = NPM_PUBLISH_ERROR_MAP[code] ?? NPM_PUBLISH_ERROR_MAP.UNKNOWN;
+  const retryCommand = getPublishCommend(packager, npmTag, registryFromOutput || registry);
+
+  return {
+    code,
+    registry: registryFromOutput || registry,
+    package: pkg,
+    reason: template.reason,
+    fixes: template.fixes,
+    retryCommand,
+  };
+}
+
+/**
+ * 打印发布失败诊断信息与重试方式
+ */
+export function printPublishFailure(parsed, { mirrorType, configPath = './config/build.config.json', npmTag } = {}) {
+  Logger.error('发布失败', `${parsed.package} → ${mirrorType} (${parsed.registry})`);
+  Logger.error('原因', `${parsed.reason}（${parsed.code}）`);
+  Logger.warn('修复建议：');
+
+  parsed.fixes.forEach((fix, index) => {
+    Logger.log(`  ${index + 1}. ${fix}`);
+  });
+
+  Logger.warn('重新尝试（仅推送，不升版本）：');
+  Logger.log(`  ${parsed.retryCommand}`);
+  Logger.warn('或使用工具仅重试 publish 步骤：');
+  Logger.log(
+    `  node index.mjs run --config ${configPath} --task publish --mirrorType ${mirrorType} --npmTag ${npmTag || 'latest'}`
+  );
+}
+
+/**
+ * 版本已提交但发布失败时的善后提示
+ */
+export function printPartialPublishFailure(version) {
+  Logger.warn(`版本 ${version} 已写入 package.json 并提交 Git，但 npm 发布未成功。`);
+  Logger.log('可选操作：');
+  Logger.log('  - 修复权限/镜像问题后，使用 --task publish 仅重试推送（版本不变）');
+  Logger.log('  - 或 git revert 撤销版本提交后重新走完整发布流程');
 }
 
 /**
@@ -343,8 +458,10 @@ export const replaceString = (originString, name = '', version = '') => {
 /**
  * 获取当前分支
  */
-export const getCurrentBranch = () => {
-  return execShell(gitCurrentBranch);
+export const getCurrentBranch = async () => {
+  const { stdout } = await execShell(gitCurrentBranch);
+
+  return stdout;
 };
 
 export class Logger {

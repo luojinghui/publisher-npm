@@ -17,6 +17,7 @@ import {
   readePackageJson,
   updatePackageJsonVersion,
   execShell,
+  ExecShellError,
   gitAddCommand,
   gitCommit,
   gitPush,
@@ -27,6 +28,9 @@ import {
   MirrorMap,
   getQuickConfigMap,
   getPublishCommend,
+  parseNpmPublishError,
+  printPublishFailure,
+  printPartialPublishFailure,
   Logger,
   readeConfigJson,
   createReverseScript,
@@ -63,6 +67,9 @@ class Publisher {
       quickBeta: false,
       notPush: false,
       reverse: false,
+      mirrorType: undefined,
+      npmTag: undefined,
+      release: undefined,
       task: 'selectTag-selectVersion-selectMirror-commitTag-build-publish',
       taskConfig: {
         selectTag: false,
@@ -73,6 +80,8 @@ class Publisher {
         publish: false,
       },
     };
+
+    this.versionCommitted = false;
 
     /**
      * 用户BuildConfig配置文件内容
@@ -139,7 +148,7 @@ class Publisher {
         await this.publishPackage();
       }
     } catch (error) {
-      if (this.reverse) {
+      if (this.commandConfig.reverse) {
         Logger.error('unpublish error', error);
         return Promise.reject(error);
       } else {
@@ -181,6 +190,34 @@ class Publisher {
     const { version, name } = readePackageJson(packagePath);
     this.currentVersion = version;
     this.packageName = name;
+
+    this.applyCommandLineSelectConfig();
+  }
+
+  /**
+   * 应用命令行非交互参数（--mirrorType / --npmTag / --release）
+   */
+  applyCommandLineSelectConfig() {
+    const { mirrorType, npmTag, release } = this.commandConfig;
+    const { mirrorMap } = this.buildConfig;
+
+    if (npmTag) {
+      this.userSelectConfig.npmTag = npmTag;
+    }
+
+    if (release) {
+      this.userSelectConfig.release = release;
+    }
+
+    if (mirrorType) {
+      if (!mirrorMap[mirrorType]) {
+        const available = Object.keys(mirrorMap).join(', ');
+        Logger.error(`镜像 "${mirrorType}" 不存在，可选: ${available}`);
+        throw new Error('Invalid mirrorType');
+      }
+
+      this.userSelectConfig.mirrorType = mirrorType;
+    }
   }
 
   /**
@@ -218,17 +255,33 @@ class Publisher {
    */
   async reverseVersion() {
     const { mirrorMap, packager } = this.buildConfig;
+    const { mirrorType: cliMirrorType } = this.commandConfig;
 
     const { release } = await inquirer.prompt(QuestionInputVersion);
-    const { mirrorType } = await inquirer.prompt(getQuestionMirrorType(mirrorMap));
+
+    let mirrorType = cliMirrorType;
+
+    if (!mirrorType) {
+      const answer = await inquirer.prompt(getQuestionMirrorType(mirrorMap));
+      mirrorType = answer.mirrorType;
+    } else if (!mirrorMap[mirrorType]) {
+      const available = Object.keys(mirrorMap).join(', ');
+      Logger.error(`镜像 "${mirrorType}" 不存在，可选: ${available}`);
+      return Promise.reject('Invalid mirrorType');
+    }
+
     const mirror = mirrorMap[mirrorType];
     const packagePath = this.getPackageJsonPath();
     const { script, module } = await createReverseScript(packager, release, mirror, packagePath);
 
     Logger.log('unpublish script: ', script);
+
     try {
       await execShell(script, true);
-    } catch (error) {}
+    } catch (error) {
+      Logger.error('撤销版本失败', error instanceof ExecShellError ? error.stderr || error.message : error);
+      return Promise.reject('unpublish failed');
+    }
 
     Logger.green('撤销版本成功：', module);
   }
@@ -247,15 +300,27 @@ class Publisher {
       const { selectVersion, selectMirror, selectTag } = this.commandConfig.taskConfig;
 
       if (selectTag) {
-        await this.createPublishTag();
+        if (this.commandConfig.npmTag) {
+          this.userSelectConfig.npmTag = this.commandConfig.npmTag;
+        } else {
+          await this.createPublishTag();
+        }
       }
 
       if (selectVersion) {
-        await this.createNpmVersion();
+        if (this.commandConfig.release) {
+          this.userSelectConfig.release = this.commandConfig.release;
+        } else {
+          await this.createNpmVersion();
+        }
       }
 
       if (selectMirror) {
-        await this.createMirrorType();
+        if (this.commandConfig.mirrorType) {
+          this.userSelectConfig.mirrorType = this.commandConfig.mirrorType;
+        } else {
+          await this.createMirrorType();
+        }
       }
 
       Logger.log('发布版本配置信息', JSON.stringify(this.userSelectConfig));
@@ -347,21 +412,16 @@ class Publisher {
     updatePackageJsonVersion(packageJsonPath, nextVersion);
 
     if (!notPush) {
-      try {
-        await execShell(gitCommitPushCommand, false);
-        Logger.green('版本变动Git提交成功');
-      } catch (error) {}
+      await execShell(gitCommitPushCommand, false);
+      Logger.green('版本变动Git提交成功');
     } else {
-      try {
-        await execShell(gitAddCommitCommand, false);
-        Logger.warn('版本变动生成Message成功，未提交Git变动，请及时提交');
-      } catch (error) {}
+      await execShell(gitAddCommitCommand, false);
+      Logger.warn('版本变动生成Message成功，未提交Git变动，请及时提交');
       Logger.log('忽略Git提交变动');
     }
 
-    try {
-      await execShell(`${gitAddTagCommand} && ${gitTagPushCommand}`);
-    } catch (error) {}
+    await execShell(`${gitAddTagCommand} && ${gitTagPushCommand}`);
+    this.versionCommitted = true;
     Logger.green('Git变更Version提交成功: ', nextVersion);
   }
 
@@ -389,16 +449,61 @@ class Publisher {
 
       const buildCommend = `${packager} ${buildScript}`;
       script = buildCommend;
-      try {
-        await execShell(buildCommend, true);
-      } catch (error) {}
-
+      await execShell(buildCommend, true);
       Logger.green('构建SDK包成功');
     } catch (error) {
       Logger.error('build script:', script);
       Logger.error('build package error', error);
       return Promise.reject('build package error');
     }
+  }
+
+  /**
+   * 推送至单个镜像
+   */
+  async publishToMirror({ name, version, npmTag, mirrorType, mirrorMap, packager, buildDir }) {
+    const mirror = mirrorMap[mirrorType];
+
+    if (!mirror) {
+      throw new Error(`镜像 "${mirrorType}" 未配置 registry 地址`);
+    }
+
+    const packageDir = path.resolve(buildDir);
+    const cd = `cd ${packageDir}`;
+    const publishCommend = getPublishCommend(packager, npmTag, mirror);
+    const command = `${cd} && pwd && ${publishCommend}`;
+
+    Logger.log('publish package: ', publishCommend);
+    Logger.log('正在推送软件包...');
+
+    try {
+      await execShell(command, true);
+    } catch (error) {
+      const execError = error instanceof ExecShellError ? error : null;
+      const parsed = parseNpmPublishError({
+        stdout: execError?.stdout ?? '',
+        stderr: execError?.stderr ?? String(error),
+        packageName: name,
+        version,
+        registry: mirror,
+        packager,
+        npmTag,
+      });
+
+      printPublishFailure(parsed, {
+        mirrorType,
+        configPath: this.commandConfig.config,
+        npmTag,
+      });
+
+      if (this.versionCommitted) {
+        printPartialPublishFailure(version);
+      }
+
+      return Promise.reject(`publish failed: ${parsed.code}`);
+    }
+
+    return { success: true, mirrorType, registry: mirror, package: `${name}@${version}` };
   }
 
   /**
@@ -421,22 +526,17 @@ class Publisher {
     Logger.log(`开始推送${projectName} Npm包...`);
     Logger.log('build package directory: ', packageDir);
 
-    try {
-      const mirror = mirrorMap[mirrorType];
-      const cd = `cd ${packageDir}`;
-      const publishCommend = getPublishCommend(packager, npmTag, mirror);
+    const result = await this.publishToMirror({
+      name,
+      version,
+      npmTag,
+      mirrorType,
+      mirrorMap,
+      packager,
+      buildDir,
+    });
 
-      Logger.log('publish package: ', publishCommend);
-      Logger.log('正在推送软件包...');
-
-      try {
-        await execShell(`${cd} && pwd && ${publishCommend}`, true);
-      } catch (error) {}
-
-      Logger.green(`已推送包到${mirrorType}仓库：`, `${name}@${version}`);
-    } catch (error) {
-      Logger.error('publish package error:', error);
-    }
+    Logger.green(`已推送包到${mirrorType}仓库：`, result.package);
   }
 }
 
