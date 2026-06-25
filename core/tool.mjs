@@ -155,7 +155,6 @@ const NPM_PUBLISH_ERROR_MAP = {
     fixes: [
       '执行 npm whoami 或 pnpm whoami 确认已登录且账号正确',
       '若包名已被他人占用，改用 scoped 包名（如 @your-org/name）或仅发布到私有镜像',
-      '首次发布 scoped 包需加 --access public',
     ],
   },
   E403: {
@@ -179,22 +178,13 @@ const NPM_PUBLISH_ERROR_MAP = {
 /**
  * 解析 npm publish 失败输出，生成原因、修复建议与重试命令
  */
-export function parseNpmPublishError({
-  stdout = '',
-  stderr = '',
-  packageName = '',
-  version = '',
-  registry = '',
-  packager = 'pnpm',
-  npmTag = 'latest',
-} = {}) {
+export function parseNpmPublishError({ stdout = '', stderr = '', packageName = '', version = '', registry = '' } = {}) {
   const output = `${stdout}\n${stderr}`;
   const codeMatch = output.match(/npm error code (\w+)/i);
   const code = codeMatch?.[1]?.toUpperCase() ?? 'UNKNOWN';
   const registryFromOutput = output.match(/Publishing to (https?:\/\/[^\s]+)/i)?.[1] ?? registry;
   const pkg = packageName && version ? `${packageName}@${version}` : packageName;
   const template = NPM_PUBLISH_ERROR_MAP[code] ?? NPM_PUBLISH_ERROR_MAP.UNKNOWN;
-  const retryCommand = getPublishCommend(packager, npmTag, registryFromOutput || registry);
 
   return {
     code,
@@ -202,12 +192,11 @@ export function parseNpmPublishError({
     package: pkg,
     reason: template.reason,
     fixes: template.fixes,
-    retryCommand,
   };
 }
 
 /**
- * 打印发布失败诊断信息与重试方式
+ * 打印发布失败诊断信息
  */
 export function printPublishFailure(parsed, { mirrorType } = {}) {
   Logger.error('发布失败', `${parsed.package} → ${mirrorType} (${parsed.registry})`);
@@ -217,29 +206,25 @@ export function printPublishFailure(parsed, { mirrorType } = {}) {
   parsed.fixes.forEach((fix, index) => {
     Logger.log(`  ${index + 1}. ${fix}`);
   });
-
-  Logger.warn('修复后可手动重试：');
-  Logger.log(`  ${parsed.retryCommand}`);
 }
 
 /**
- * 生成「仅发布镜像包」的 task 重试命令（版本已提交、publish 失败场景）
+ * 生成「仅发布镜像包」的 task 重试参数（版本已提交、publish 失败场景）
  */
-export function getPublishRetryTaskCommand({ configPath, mirrorType, npmTag }) {
+export function getPublishRetryTaskCommand({ mirrorType, npmTag }) {
   return `--task publish --mirrorType ${mirrorType} --npmTag ${npmTag}`;
 }
 
 /**
  * 版本已提交但发布失败时的善后提示
  */
-export function printPartialPublishFailure(version, { configPath, mirrorType, npmTag } = {}) {
+export function printPartialPublishFailure(version, { mirrorType, npmTag } = {}) {
   Logger.warn(`版本 ${version} 已写入 package.json 并提交 Git，但 npm 发布未成功。`);
-  Logger.log('可选操作：');
 
-  if (configPath && mirrorType && npmTag) {
-    const retryTaskCommand = getPublishRetryTaskCommand({ configPath, mirrorType, npmTag });
-    Logger.warn('修复问题后，可在推送命令中添加以下参数仅发布镜像包（不升版本、不构建）：');
-    Logger.log(`  ${retryTaskCommand}`);
+  if (mirrorType && npmTag) {
+    const retryParams = getPublishRetryTaskCommand({ mirrorType, npmTag });
+    Logger.warn('修复问题后，在原发布命令后追加以下参数重试（不升版本、不构建）：');
+    Logger.log(`  ${retryParams}`);
   }
 }
 

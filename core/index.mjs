@@ -486,15 +486,12 @@ class Publisher {
         packageName: name,
         version,
         registry: mirror,
-        packager,
-        npmTag,
       });
 
       printPublishFailure(parsed, { mirrorType });
 
       if (this.versionCommitted) {
         printPartialPublishFailure(version, {
-          configPath: this.commandConfig.config,
           mirrorType,
           npmTag,
         });
